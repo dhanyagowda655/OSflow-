@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Workflow #{{ workflow.id }} — FlowOS{% endblock %}
+{% block header_title %}Workflow DAG Execution Details{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0" id="liveWorkflowTracker" data-workflow-id="{{ workflow.id }}">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h4 class="fw-bold mb-1">{{ workflow.name }}</h4>
+      <span class="text-muted small">Created: {{ workflow.created_at.strftime('%b %d, %Y %H:%M') }} &bull; Source: {{ workflow.source_text or 'Direct' }}</span>
+    </div>
+    <div>
+      <span id="workflowStatusBadge" class="badge bg-{{ 'success' if workflow.status == 'completed' else ('danger' if workflow.status == 'failed' else 'primary') }} fs-6">
+        {{ workflow.status.upper() }}
+      </span>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="card shadow-sm p-4">
+        <h5 class="fw-bold mb-3">Workflow Execution Steps</h5>
+
+        <!-- Progress Bar -->
+        {% set total_steps = steps|length %}
+        {% set done_steps = steps | selectattr('status', 'equalto', 'done') | list | length %}
+        {% set progress_pct = (done_steps / total_steps * 100)|int if total_steps > 0 else 0 %}
+        <div class="progress mb-4" style="height: 8px;">
+          <div id="workflowProgressBar" class="progress-bar bg-primary" role="progressbar" style="width: {{ progress_pct }}%;"></div>
+        </div>
+
+        <div class="timeline">
+          {% for step in steps %}
+          <div class="timeline-step" id="step-{{ step.id }}">
+            <div class="timeline-step-icon bg-{{ step.status }}">
+              {% if step.status == 'done' %}✓
+              {% elif step.status == 'failed' %}✗
+              {% elif step.status == 'in_progress' %}⟳
+              {% else %}•{% endif %}
+            </div>
+
+            <div class="d-flex justify-content-between align-items-start mb-1">
+              <div>
+                <h6 class="fw-bold text-dark mb-0">{{ step.name }}</h6>
+                <span class="badge bg-secondary badge-role" style="font-size: 0.65rem;">{{ step.agent_type.upper() }} AGENT</span>
+              </div>
+              <span class="badge bg-{{ step.status }} step-status-text">
+                {{ step.status.replace('_', ' ').upper() }}
+              </span>
+            </div>
+
+            <div class="small text-muted mb-1 step-result-text">
+              {{ step.result_text or 'Pending agent execution.' }}
+            </div>
+
+            {% if step.retry_count and step.retry_count > 0 %}
+            <div class="small text-warning">
+              <i class="bi bi-arrow-clockwise"></i> Retried {{ step.retry_count }} time(s) with exponential backoff.
+            </div>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+
+        {% if workflow.status in ['in_progress', 'pending'] %}
+        <div class="mt-4 pt-3 border-top">
+          <form method="POST" action="{{ url_for('workflow.resume_workflow', id=workflow.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-outline-primary btn-sm">
+              <i class="bi bi-play-fill"></i> Trigger Step Dispatcher
+            </button>
+          </form>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card shadow-sm p-4">
+        <h5 class="fw-bold mb-3">Raw DAG Definition</h5>
+        <pre class="bg-dark text-light p-3 rounded small mb-0" style="max-height: 400px; overflow-y: auto;"><code>{{ workflow.dag_json }}</code></pre>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}HR Dashboard — FlowOS{% endblock %}
+{% block header_title %}Human Resources Portal{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+
+  <!-- HR Header Banner -->
+  <div class="card p-4 mb-4 text-white border-0 shadow-sm" style="background: linear-gradient(135deg, #0e7490 0%, #0f172a 100%);">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <h4 class="fw-bold mb-1">HR Talent & Operations Control</h4>
+        <p class="text-light opacity-75 small mb-0">Automated Employee Onboarding, Leave Balance Management & Natural-Language Workflow Generation</p>
+      </div>
+      <div class="col-md-4 text-md-end mt-3 mt-md-0">
+        <a href="{{ url_for('hr.onboard_employee') }}" class="btn btn-light fw-bold me-2">
+          <i class="bi bi-person-plus-fill text-info"></i> Onboard Employee
+        </a>
+        <a href="{{ url_for('workflow.builder') }}" class="btn btn-warning fw-bold">
+          <i class="bi bi-diagram-3-fill"></i> Workflow Studio
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Key Metrics -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="card p-3 stat-card">
+        <div class="text-muted small fw-semibold">Total Staff Registered</div>
+        <h3 class="fw-bold text-dark mt-1 mb-0">{{ total_employees }}</h3>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card p-3" style="border-left: 4px solid var(--primary);">
+        <div class="text-muted small fw-semibold">Active Onboarding Pipelines</div>
+        <h3 class="fw-bold text-primary mt-1 mb-0">{{ active_onboardings }}</h3>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card p-3" style="border-left: 4px solid var(--warning);">
+        <div class="text-muted small fw-semibold">Pending Leave Requests</div>
+        <h3 class="fw-bold text-warning mt-1 mb-0">{{ pending_leaves }}</h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- Onboarding Pipelines Stream -->
+  <div class="card shadow-sm p-4 mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="fw-bold mb-0"><i class="bi bi-person-check text-info"></i> Recent Onboarding Workflows</h5>
+      <a href="{{ url_for('hr.onboard_employee') }}" class="btn btn-sm btn-outline-primary">+ New Hire</a>
+    </div>
+
+    {% if onboarding_requests %}
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>Employee Name</th>
+            <th>Designation</th>
+            <th>Started</th>
+            <th>Pipeline Status</th>
+            <th>Workflow DAG</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in onboarding_requests %}
+          <tr>
+            <td><span class="fw-bold text-secondary">#{{ r.id }}</span></td>
+            <td><strong>{{ r.employee.user.name if r.employee and r.employee.user else 'Hire' }}</strong></td>
+            <td>{{ r.employee.designation if r.employee else 'Staff' }}</td>
+            <td class="text-muted small">{{ r.created_at.strftime('%b %d, %Y') }}</td>
+            <td>
+              <span class="badge bg-{{ 'success' if r.status == 'completed' else ('danger' if r.status == 'failed' else 'primary') }}">
+                {{ r.status.upper() }}
+              </span>
+            </td>
+            <td>
+              <a href="{{ url_for('employee.request_detail', id=r.id) }}" class="btn btn-sm btn-light border">
+                <i class="bi bi-diagram-3"></i> View Steps
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="text-muted small mb-0">No active onboarding workflows found.</p>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

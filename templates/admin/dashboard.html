@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% block title %}System Administrator Dashboard — FlowOS{% endblock %}
+{% block header_title %}System Administration & AI Telemetry{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+
+  <!-- Admin Banner -->
+  <div class="card p-4 mb-4 text-white border-0 shadow-sm" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <h4 class="fw-bold mb-1">FlowOS Administration & Security</h4>
+        <p class="text-light opacity-75 small mb-0">Role Management, Multi-Tier AI Provider Monitoring, and Audit Logging</p>
+      </div>
+      <div class="col-md-4 text-md-end mt-3 mt-md-0">
+        <a href="{{ url_for('admin.analytics') }}" class="btn btn-primary fw-bold me-2">
+          <i class="bi bi-graph-up-arrow"></i> ML Analytics
+        </a>
+        <a href="{{ url_for('admin.audit_logs') }}" class="btn btn-outline-light">
+          <i class="bi bi-journal-text"></i> Audit Logs
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI Services Live Health Status (Section 6 & 8) -->
+  <div class="card shadow-sm p-4 mb-4 border-2">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div class="d-flex align-items-center gap-2">
+        <i class="bi bi-heart-pulse-fill text-danger fs-4"></i>
+        <h5 class="fw-bold mb-0">Multi-Tier AI Service Health</h5>
+      </div>
+      <button class="btn btn-sm btn-outline-primary" id="pingAiBtn">
+        <i class="bi bi-arrow-repeat"></i> Ping AI Endpoints
+      </button>
+    </div>
+
+    <div class="row g-3" id="aiHealthContainer">
+      <!-- Gemini -->
+      <div class="col-md-4">
+        <div class="p-3 rounded bg-light border">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <span class="fw-bold">Google Gemini API</span>
+            <span class="badge bg-{{ 'success' if health.gemini.status == 'healthy' else ('secondary' if health.gemini.status == 'not_configured' else 'danger') }}">
+              {{ health.gemini.status.upper() }}
+            </span>
+          </div>
+          <p class="small text-muted mb-0">{{ health.gemini.message }}</p>
+        </div>
+      </div>
+
+      <!-- Mistral -->
+      <div class="col-md-4">
+        <div class="p-3 rounded bg-light border">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <span class="fw-bold">Mistral AI API</span>
+            <span class="badge bg-{{ 'success' if health.mistral.status == 'healthy' else ('secondary' if health.mistral.status == 'not_configured' else 'danger') }}">
+              {{ health.mistral.status.upper() }}
+            </span>
+          </div>
+          <p class="small text-muted mb-0">{{ health.mistral.message }}</p>
+        </div>
+      </div>
+
+      <!-- Rule Engine -->
+      <div class="col-md-4">
+        <div class="p-3 rounded bg-light border">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <span class="fw-bold">Rule-Based Fallback Engine</span>
+            <span class="badge bg-success">100% ONLINE</span>
+          </div>
+          <p class="small text-muted mb-0">{{ health.rule_engine.message }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- System Metrics -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-3">
+      <div class="card p-3 stat-card">
+        <div class="text-muted small fw-semibold">Total System Users</div>
+        <h3 class="fw-bold text-dark mt-1 mb-0">{{ total_users }}</h3>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card p-3" style="border-left: 4px solid var(--primary);">
+        <div class="text-muted small fw-semibold">Executed Requests</div>
+        <h3 class="fw-bold text-primary mt-1 mb-0">{{ total_requests }}</h3>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card p-3" style="border-left: 4px solid var(--success);">
+        <div class="text-muted small fw-semibold">Generated Workflows</div>
+        <h3 class="fw-bold text-success mt-1 mb-0">{{ total_workflows }}</h3>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card p-3" style="border-left: 4px solid var(--warning);">
+        <div class="text-muted small fw-semibold">AI Audit Events Logged</div>
+        <h3 class="fw-bold text-warning mt-1 mb-0">{{ total_logs }}</h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Quick Access Grid -->
+  <div class="row g-3">
+    <div class="col-md-4">
+      <a href="{{ url_for('admin.users_list') }}" class="text-decoration-none">
+        <div class="card card-hover p-4 text-center">
+          <i class="bi bi-people-fill fs-2 text-primary mb-2"></i>
+          <h6 class="fw-bold text-dark mb-1">User & Role Management</h6>
+          <p class="text-muted small mb-0">Create users, toggle active status, and assign RBAC roles</p>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-md-4">
+      <a href="{{ url_for('admin.departments_list') }}" class="text-decoration-none">
+        <div class="card card-hover p-4 text-center">
+          <i class="bi bi-building fs-2 text-info mb-2"></i>
+          <h6 class="fw-bold text-dark mb-1">Department Structure</h6>
+          <p class="text-muted small mb-0">Configure enterprise departments and cost centers</p>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-md-4">
+      <a href="{{ url_for('admin.templates_list') }}" class="text-decoration-none">
+        <div class="card card-hover p-4 text-center">
+          <i class="bi bi-collection-fill fs-2 text-success mb-2"></i>
+          <h6 class="fw-bold text-dark mb-1">Workflow Templates</h6>
+          <p class="text-muted small mb-0">Inspect pre-seeded DAG templates and vector embeddings</p>
+        </div>
+      </a>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('pingAiBtn')?.addEventListener('click', () => {
+  const btn = document.getElementById('pingAiBtn');
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Testing...';
+  
+  fetch('/admin/ping-ai', {
+    method: 'POST',
+    headers: {
+      'X-Requested-With': 'XMLHttpRequest',
+      'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+    }
+  })
+  .then(res => res.json())
+  .then(health => {
+    location.reload();
+  })
+  .catch(() => {
+    btn.innerHTML = '<i class="bi bi-arrow-repeat"></i> Ping AI Endpoints';
+  });
+});
+</script>
+{% endblock %}

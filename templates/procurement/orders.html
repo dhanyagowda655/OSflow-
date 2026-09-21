@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Procurement Orders — FlowOS{% endblock %}
+{% block header_title %}Procurement & Purchase Orders Ledger{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm p-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h5 class="fw-bold mb-0">Hardware PO Tracking</h5>
+    <span class="text-muted small">Real-time status updates linked to employee asset records</span>
+  </div>
+
+  {% if orders %}
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>PO / Request ID</th>
+          <th>Recipient</th>
+          <th>Equipment Model</th>
+          <th>Created</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for o in orders %}
+        <tr>
+          <td><span class="fw-bold">#{{ o.id }}</span></td>
+          <td>{{ o.employee.user.name if o.employee and o.employee.user else 'Staff' }}</td>
+          <td><span class="fw-semibold">{{ o.title }}</span></td>
+          <td class="text-muted small">{{ o.created_at.strftime('%Y-%m-%d') }}</td>
+          <td>
+            <span class="badge bg-{{ 'success' if o.status == 'completed' else 'warning text-dark' }}">
+              {{ o.status.upper() }}
+            </span>
+          </td>
+          <td>
+            {% if o.status != 'completed' %}
+            <form method="POST" action="{{ url_for('procurement.fulfill_order', id=o.id) }}" class="d-inline">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="btn btn-sm btn-success fw-semibold">
+                <i class="bi bi-truck"></i> Dispatch
+              </button>
+            </form>
+            {% else %}
+            <span class="text-muted small"><i class="bi bi-check2 text-success"></i> Dispatched</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="text-center py-5 text-muted">
+    <i class="bi bi-box-seam fs-1"></i>
+    <p class="mt-2 mb-0">No procurement orders recorded.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

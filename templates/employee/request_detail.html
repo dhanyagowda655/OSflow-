@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block title %}Request #{{ request.id }} Timeline — FlowOS{% endblock %}
+{% block header_title %}Request & Workflow Tracking{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0" id="liveWorkflowTracker" data-workflow-id="{{ request.workflow_id }}">
+  
+  <!-- Back Button & Title -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <a href="{{ url_for('employee.requests_list') }}" class="btn btn-sm btn-outline-secondary">
+      <i class="bi bi-arrow-left"></i> Back to Requests
+    </a>
+    <div>
+      <span class="badge bg-light text-dark border me-2">Type: {{ request.type.replace('_', ' ').upper() }}</span>
+      <span id="workflowStatusBadge" class="badge bg-{{ 'success' if request.status == 'completed' else ('danger' if request.status == 'rejected' or request.status == 'failed' else 'primary') }}">
+        {{ request.status.upper() }}
+      </span>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Left Column: Request Details & ML Delay Prediction -->
+    <div class="col-lg-5">
+      <!-- Details Card -->
+      <div class="card shadow-sm p-4 mb-4">
+        <h5 class="fw-bold mb-3">{{ request.title }}</h5>
+        <p class="text-muted small mb-3">{{ request.description }}</p>
+
+        <div class="border-top pt-3">
+          <div class="row g-2 small">
+            <div class="col-6 text-muted">Requester:</div>
+            <div class="col-6 fw-semibold text-end">{{ request.employee.user.name if request.employee and request.employee.user else 'N/A' }}</div>
+            
+            <div class="col-6 text-muted">Submitted At:</div>
+            <div class="col-6 fw-semibold text-end">{{ request.created_at.strftime('%b %d, %Y %H:%M') }}</div>
+
+            <div class="col-6 text-muted">Workflow ID:</div>
+            <div class="col-6 fw-semibold text-end text-primary">#{{ request.workflow_id or 'N/A' }}</div>
+          </div>
+        </div>
+
+        {% if request.expense_claim %}
+        <div class="bg-light rounded p-3 mt-3 border">
+          <div class="fw-bold text-dark small mb-1"><i class="bi bi-receipt"></i> OCR Expense Audit</div>
+          <div class="small text-muted">Vendor: <span class="text-dark fw-semibold">{{ request.expense_claim.vendor }}</span></div>
+          <div class="small text-muted">Amount: <span class="text-dark fw-semibold">${{ "%.2f"|format(request.expense_claim.amount) }}</span></div>
+          <div class="small text-muted">Duplicate Check: 
+            {% if request.expense_claim.duplicate_flag %}
+              <span class="badge bg-danger">Duplicate Detected</span>
+            {% else %}
+              <span class="badge bg-success">Unique Claim</span>
+            {% endif %}
+          </div>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- ML Delay Prediction Card (Milestone 7) -->
+      {% if prediction %}
+      <div class="card shadow-sm p-4 border-{{ prediction.badge_class }} border-2">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-cpu-fill text-{{ prediction.badge_class }} fs-4"></i>
+            <h6 class="fw-bold mb-0">ML Turnaround Predictor</h6>
+          </div>
+          <span class="badge bg-{{ prediction.badge_class }}">{{ prediction.risk_level }}</span>
+        </div>
+        <p class="text-muted small mb-2">Machine Learning GradientBoosting model trained on historical task execution data.</p>
+        <div class="d-flex justify-content-between align-items-center bg-light p-2 rounded">
+          <span class="small text-muted">Estimated SLA Target:</span>
+          <span class="fw-bold text-dark">{{ prediction.sla_target }}</span>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Right Column: Live Timeline of Multi-Agent DAG Steps -->
+    <div class="col-lg-7">
+      <div class="card shadow-sm p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold mb-0"><i class="bi bi-diagram-3 text-primary"></i> Multi-Agent Execution Pipeline</h5>
+          <span class="text-muted small"><i class="bi bi-arrow-repeat text-primary spin"></i> Live Polling</span>
+        </div>
+
+        <!-- Overall Progress Bar -->
+        {% set total_steps = steps|length %}
+        {% set done_steps = steps | selectattr('status', 'equalto', 'done') | list | length %}
+        {% set progress_pct = (done_steps / total_steps * 100)|int if total_steps > 0 else 0 %}
+        <div class="progress mb-4" style="height: 8px;">
+          <div id="workflowProgressBar" class="progress-bar bg-primary" role="progressbar" style="width: {{ progress_pct }}%;"></div>
+        </div>
+
+        <!-- Steps Timeline -->
+        <div class="timeline mt-3">
+          {% for step in steps %}
+          <div class="timeline-step" id="step-{{ step.id }}">
+            <div class="timeline-step-icon bg-{{ step.status }}">
+              {% if step.status == 'done' %}✓
+              {% elif step.status == 'failed' %}✗
+              {% elif step.status == 'in_progress' %}⟳
+              {% else %}•{% endif %}
+            </div>
+
+            <div class="d-flex justify-content-between align-items-start mb-1">
+              <div>
+                <h6 class="fw-bold text-dark mb-0">{{ step.name }}</h6>
+                <span class="badge bg-secondary badge-role" style="font-size: 0.65rem;">{{ step.agent_type.upper() }} AGENT</span>
+              </div>
+              <span class="badge bg-{{ step.status }} step-status-text">
+                {{ step.status.replace('_', ' ').upper() }}
+              </span>
+            </div>
+
+            <div class="small text-muted mb-1 step-result-text">
+              {{ step.result_text or 'Pending execution by agent.' }}
+            </div>
+
+            {% if step.retry_count and step.retry_count > 0 %}
+            <div class="small text-warning">
+              <i class="bi bi-arrow-clockwise"></i> Retried {{ step.retry_count }} time(s) with exponential backoff.
+            </div>
+            {% endif %}
+
+            {% if step.status == 'waiting_approval' and current_user.role in ['manager', 'admin'] %}
+            <!-- Quick Manager Approval Action Inline -->
+            <div class="bg-warning-subtle p-2 rounded mt-2 d-flex gap-2">
+              <form method="POST" action="{{ url_for('manager.approve_request', id=request.approvals[0].id if request.approvals else 1) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-sm btn-success"><i class="bi bi-check"></i> Approve Now</button>
+              </form>
+              <form method="POST" action="{{ url_for('manager.reject_request', id=request.approvals[0].id if request.approvals else 1) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-sm btn-danger"><i class="bi bi-x"></i> Reject</button>
+              </form>
+            </div>
+            {% endif %}
+
+          </div>
+          {% endfor %}
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

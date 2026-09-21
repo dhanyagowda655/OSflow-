@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}IT Operations Dashboard — FlowOS{% endblock %}
+{% block header_title %}IT Infrastructure & Support Hub{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+
+  <!-- IT Operations Banner -->
+  <div class="card p-4 mb-4 text-white border-0 shadow-sm" style="background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <h4 class="fw-bold mb-1">IT Infrastructure Command Center</h4>
+        <p class="text-light opacity-75 small mb-0">Automated Ticket Triage, Laptop OS Provisioning & Asset Lifecycle Management</p>
+      </div>
+      <div class="col-md-4 text-md-end mt-3 mt-md-0">
+        <a href="{{ url_for('it.tickets_list') }}" class="btn btn-danger fw-semibold me-2">
+          <i class="bi bi-tools"></i> Open Tickets ({{ open_tickets }})
+        </a>
+        <a href="{{ url_for('it.assets_list') }}" class="btn btn-outline-light">
+          <i class="bi bi-hdd-network"></i> Assets ({{ total_assets }})
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- IT Metrics -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-3">
+      <div class="card p-3 stat-card">
+        <div class="text-muted small fw-semibold">Open Support Tickets</div>
+        <h3 class="fw-bold text-danger mt-1 mb-0">{{ open_tickets }}</h3>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card p-3" style="border-left: 4px solid var(--primary);">
+        <div class="text-muted small fw-semibold">Hardware Deployments</div>
+        <h3 class="fw-bold text-primary mt-1 mb-0">{{ pending_laptops }}</h3>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card p-3" style="border-left: 4px solid var(--success);">
+        <div class="text-muted small fw-semibold">Hardware In Stock</div>
+        <h3 class="fw-bold text-success mt-1 mb-0">{{ in_stock_assets }}</h3>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card p-3" style="border-left: 4px solid var(--warning);">
+        <div class="text-muted small fw-semibold">Total Fleet Assets</div>
+        <h3 class="fw-bold text-warning mt-1 mb-0">{{ total_assets }}</h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- IT Ticket Triage Queue -->
+  <div class="row g-4">
+    <div class="col-lg-6">
+      <div class="card shadow-sm p-4 h-100">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold mb-0"><i class="bi bi-ticket-detailed text-danger"></i> Recent IT Tickets</h5>
+          <a href="{{ url_for('it.tickets_list') }}" class="btn btn-sm btn-outline-primary">View Queue</a>
+        </div>
+
+        {% if recent_tickets %}
+        <div class="table-responsive">
+          <table class="table table-hover table-sm align-middle">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Summary</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for t in recent_tickets %}
+              <tr>
+                <td>#{{ t.id }}</td>
+                <td><span class="fw-semibold">{{ t.title }}</span></td>
+                <td><span class="badge bg-light text-dark border">{{ t.priority.upper() }}</span></td>
+                <td>
+                  <span class="badge bg-{{ 'success' if t.status == 'completed' else 'warning text-dark' }}">
+                    {{ t.status.upper() }}
+                  </span>
+                </td>
+                <td>
+                  <a href="{{ url_for('employee.request_detail', id=t.id) }}" class="btn btn-sm btn-light border py-0">View</a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <p class="text-muted small">No IT tickets logged.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card shadow-sm p-4 h-100">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold mb-0"><i class="bi bi-laptop text-primary"></i> Hardware Provisioning Queue</h5>
+          <a href="{{ url_for('it.assets_list') }}" class="btn btn-sm btn-outline-primary">Fleet Manager</a>
+        </div>
+
+        {% if hardware_requests %}
+        <div class="table-responsive">
+          <table class="table table-hover table-sm align-middle">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Requester</th>
+                <th>Device</th>
+                <th>Status</th>
+                <th>Track</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for h in hardware_requests %}
+              <tr>
+                <td>#{{ h.id }}</td>
+                <td>{{ h.employee.user.name if h.employee and h.employee.user else 'Staff' }}</td>
+                <td><span class="fw-semibold">{{ h.title }}</span></td>
+                <td>
+                  <span class="badge bg-{{ 'success' if h.status == 'completed' else 'primary' }}">
+                    {{ h.status.upper() }}
+                  </span>
+                </td>
+                <td>
+                  <a href="{{ url_for('employee.request_detail', id=h.id) }}" class="btn btn-sm btn-light border py-0">Workflow</a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <p class="text-muted small">No hardware requests pending.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

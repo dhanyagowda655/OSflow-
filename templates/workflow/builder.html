@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% block title %}AI Workflow Studio — FlowOS{% endblock %}
+{% block header_title %}Natural-Language AI Workflow Studio{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+
+  <!-- Studio Header -->
+  <div class="card p-4 mb-4 text-white border-0 shadow-sm" style="background: linear-gradient(135deg, #4f46e5 0%, #0f172a 100%);">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <h4 class="fw-bold mb-1">Natural-Language Workflow Builder</h4>
+        <p class="text-light opacity-75 small mb-0">Describe any multi-step enterprise business process in plain English. The AI LLM will compile it into an executable Directed Acyclic Graph (DAG) with dependency ordering.</p>
+      </div>
+      <div class="col-md-4 text-md-end mt-3 mt-md-0">
+        <span class="badge bg-light text-dark px-3 py-2 fs-6"><i class="bi bi-cpu-fill text-primary"></i> Multi-Agent Orchestrator</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Left Column: Natural Language Input Form -->
+    <div class="col-lg-5">
+      <div class="card shadow-sm p-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-pencil-square text-primary"></i> Process Description</h5>
+        <p class="text-muted small mb-3">Type your process requirement or click a preset sample below:</p>
+
+        <!-- Quick Sample Badges -->
+        <div class="d-flex flex-wrap gap-2 mb-3">
+          <button type="button" class="btn btn-sm btn-outline-secondary" onclick="setPrompt('When an employee relocates: HR verifies address, IT updates VPN permissions, Finance adjusts tax jurisdiction, and send confirmation.')">
+            Employee Relocation
+          </button>
+          <button type="button" class="btn btn-sm btn-outline-secondary" onclick="setPrompt('Security Incident Response: IT isolates device, IT resets passwords, HR conducts security review, Manager notified, and generate compliance log.')">
+            Security Incident
+          </button>
+          <button type="button" class="btn btn-sm btn-outline-secondary" onclick="setPrompt('Software License Purchase: Manager review, Finance budget approval, Procurement purchase license, IT assign seat to user, notify employee.')">
+            Software License
+          </button>
+        </div>
+
+        <form method="POST" action="{{ url_for('workflow.builder') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Process Description (Plain English)</label>
+            <textarea name="prompt" id="promptTextarea" class="form-control" rows="6" placeholder="Describe the workflow steps, approvals, and actions..." required>{{ preview_text }}</textarea>
+          </div>
+
+          <div class="d-grid mb-2">
+            <button type="submit" class="btn btn-primary btn-gradient py-2 fw-semibold">
+              <i class="bi bi-stars"></i> Generate & Preview DAG
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Right Column: Interactive Visual DAG Preview -->
+    <div class="col-lg-7">
+      <div class="card shadow-sm p-4 h-100">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold mb-0"><i class="bi bi-diagram-3-fill text-primary"></i> Compiled Workflow DAG</h5>
+          {% if ai_model %}
+          <span class="badge bg-success-subtle text-success border border-success-subtle">
+            <i class="bi bi-check2-circle"></i> Compiled by {{ ai_model }}
+          </span>
+          {% endif %}
+        </div>
+
+        {% if preview_dag %}
+        <div class="mb-3">
+          <h6 class="fw-bold text-dark">{{ preview_dag.workflow_name }}</h6>
+          <span class="text-muted small">Topologically sorted into {{ preview_levels|length }} execution level(s) for maximum parallel throughput.</span>
+        </div>
+
+        <!-- Visual DAG Levels Display -->
+        <div class="dag-container">
+          {% for level in preview_levels %}
+          <div class="dag-level">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="badge bg-primary">Execution Level {{ loop.index }} {% if level|length > 1 %}(Runs in Parallel){% endif %}</span>
+              <span class="text-muted small">{{ level|length }} task(s)</span>
+            </div>
+
+            <div class="row g-2">
+              {% for task_id in level %}
+                {% set task = (preview_dag.tasks | selectattr('id', 'equalto', task_id) | first) %}
+                {% if task %}
+                <div class="col-md-{{ 12 // (level|length if level|length <= 2 else 2) }}">
+                  <div class="dag-node">
+                    <div class="d-flex justify-content-between align-items-start">
+                      <div>
+                        <span class="badge bg-secondary badge-role mb-1">{{ task.agent_type.upper() }} AGENT</span>
+                        <div class="fw-bold text-dark small">{{ task.name }}</div>
+                      </div>
+                      <span class="badge bg-light text-muted border">ID: {{ task.id }}</span>
+                    </div>
+                    {% if task.depends_on %}
+                    <div class="text-muted mt-2" style="font-size: 0.7rem;">
+                      <i class="bi bi-arrow-return-right"></i> Depends on: {{ task.depends_on|join(', ') }}
+                    </div>
+                    {% endif %}
+                  </div>
+                </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- Launch Button -->
+        <div class="mt-4 pt-3 border-top d-flex justify-content-end">
+          <form method="POST" action="{{ url_for('workflow.create_and_launch') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="prompt" value="{{ preview_text }}">
+            <button type="submit" class="btn btn-success btn-lg px-4 fw-bold shadow-sm">
+              <i class="bi bi-play-circle-fill"></i> Confirm & Launch Workflow
+            </button>
+          </form>
+        </div>
+
+        {% else %}
+        <div class="text-center py-5 my-auto text-muted">
+          <i class="bi bi-diagram-3 fs-1 text-secondary"></i>
+          <h6 class="fw-bold mt-3 text-dark">No Workflow Generated Yet</h6>
+          <p class="small text-muted mb-0">Enter a description on the left and click "Generate & Preview DAG" to see the visual execution graph.</p>
+        </div>
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function setPrompt(text) {
+  document.getElementById('promptTextarea').value = text;
+}
+</script>
+{% endblock %}

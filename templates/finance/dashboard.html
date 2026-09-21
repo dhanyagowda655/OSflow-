@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}Finance Dashboard — FlowOS{% endblock %}
+{% block header_title %}Finance & Expense Auditing Portal{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+
+  <!-- Finance Banner -->
+  <div class="card p-4 mb-4 text-white border-0 shadow-sm" style="background: linear-gradient(135deg, #065f46 0%, #0f172a 100%);">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <h4 class="fw-bold mb-1">Financial Disbursal & Audit Control</h4>
+        <p class="text-light opacity-75 small mb-0">OCR Expense Auditing, Duplicate Detection & Automated Direct Deposit Clearing</p>
+      </div>
+      <div class="col-md-4 text-md-end mt-3 mt-md-0">
+        <a href="{{ url_for('finance.claims_list') }}" class="btn btn-light fw-bold text-success">
+          <i class="bi bi-receipt"></i> Review All Claims
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Key Metrics -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="card p-3 stat-card">
+        <div class="text-muted small fw-semibold">Total Claims Disbursed</div>
+        <h3 class="fw-bold text-success mt-1 mb-0">${{ "%.2f"|format(total_amount) }}</h3>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card p-3" style="border-left: 4px solid var(--warning);">
+        <div class="text-muted small fw-semibold">Pending Audit & Disbursal</div>
+        <h3 class="fw-bold text-warning mt-1 mb-0">{{ pending_claims|length }}</h3>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card p-3" style="border-left: 4px solid var(--danger);">
+        <div class="text-muted small fw-semibold">Duplicate Claims Flagged</div>
+        <h3 class="fw-bold text-danger mt-1 mb-0">{{ duplicate_flags|length }}</h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Expenses Stream -->
+  <div class="card shadow-sm p-4 mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="fw-bold mb-0"><i class="bi bi-cash-stack text-success"></i> Expense Reimbursement Requests</h5>
+      <a href="{{ url_for('finance.claims_list') }}" class="btn btn-sm btn-outline-primary">Full Ledger</a>
+    </div>
+
+    {% if recent_expenses %}
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>Employee</th>
+            <th>Summary</th>
+            <th>Submitted</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in recent_expenses %}
+          <tr>
+            <td><span class="fw-bold">#{{ r.id }}</span></td>
+            <td>{{ r.employee.user.name if r.employee and r.employee.user else 'Staff' }}</td>
+            <td><span class="fw-semibold">{{ r.title }}</span></td>
+            <td class="text-muted small">{{ r.created_at.strftime('%b %d, %Y') }}</td>
+            <td>
+              <span class="badge bg-{{ 'success' if r.status == 'completed' else 'warning text-dark' }}">
+                {{ r.status.upper() }}
+              </span>
+            </td>
+            <td>
+              <a href="{{ url_for('employee.request_detail', id=r.id) }}" class="btn btn-sm btn-light border">
+                <i class="bi bi-eye"></i> Audit
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="text-muted small">No expense claims logged.</p>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

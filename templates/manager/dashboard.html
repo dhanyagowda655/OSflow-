@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block title %}Manager Dashboard — FlowOS{% endblock %}
+{% block header_title %}Manager Portal{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+
+  <!-- Manager Overview Banner -->
+  <div class="card p-4 mb-4 text-white border-0 shadow-sm" style="background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <h4 class="fw-bold mb-1">Manager Decision Hub</h4>
+        <p class="text-light opacity-75 small mb-0">Human-in-the-Loop Approval Queue & Team Activity Oversight</p>
+      </div>
+      <div class="col-md-4 text-md-end mt-3 mt-md-0">
+        <a href="{{ url_for('manager.approvals_list') }}" class="btn btn-warning fw-semibold shadow-sm">
+          <i class="bi bi-clock-history"></i> Pending Approvals ({{ pending_approvals|length }})
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pending Approvals Action Card -->
+  <div class="card shadow-sm p-4 mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-check2-circle text-primary"></i> Pending Manager Decisions</h5>
+      <span class="badge bg-warning text-dark">{{ pending_approvals|length }} Awaiting Action</span>
+    </div>
+
+    {% if pending_approvals %}
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>Request ID</th>
+            <th>Type</th>
+            <th>Requester</th>
+            <th>Summary</th>
+            <th>Submitted</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for app in pending_approvals %}
+          <tr>
+            <td><span class="fw-bold">#{{ app.request_id }}</span></td>
+            <td><span class="badge bg-light text-dark border">{{ app.request.type.upper() if app.request else 'REQUEST' }}</span></td>
+            <td>
+              <div class="fw-semibold">{{ app.request.employee.user.name if app.request and app.request.employee and app.request.employee.user else 'Employee' }}</div>
+              <div class="text-muted small">{{ app.request.employee.designation if app.request and app.request.employee else '' }}</div>
+            </td>
+            <td>
+              <div class="fw-semibold">{{ app.request.title if app.request else 'Approval Step' }}</div>
+              <div class="text-muted small">{{ app.request.description if app.request else '' }}</div>
+            </td>
+            <td class="text-muted small">{{ app.created_at.strftime('%b %d, %H:%M') }}</td>
+            <td>
+              <div class="d-flex gap-2">
+                <form method="POST" action="{{ url_for('manager.approve_request', id=app.id) }}">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit" class="btn btn-sm btn-success fw-semibold"><i class="bi bi-check-lg"></i> Approve</button>
+                </form>
+                <form method="POST" action="{{ url_for('manager.reject_request', id=app.id) }}">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit" class="btn btn-sm btn-outline-danger fw-semibold"><i class="bi bi-x-lg"></i> Reject</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center py-4 text-muted">
+      <i class="bi bi-check2-all text-success fs-1"></i>
+      <p class="mb-0 mt-2">All team requests have been reviewed! No approvals pending.</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Direct Reports Team Activity -->
+  <div class="row g-4">
+    <div class="col-lg-4">
+      <div class="card shadow-sm p-4 h-100">
+        <h5 class="fw-bold mb-3"><i class="bi bi-people-fill text-primary"></i> Direct Reports</h5>
+        {% if direct_reports %}
+        <ul class="list-group list-group-flush">
+          {% for emp in direct_reports %}
+          <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
+            <div>
+              <div class="fw-semibold">{{ emp.user.name if emp.user else 'Employee' }}</div>
+              <div class="text-muted small">{{ emp.designation }}</div>
+            </div>
+            <span class="badge bg-light text-secondary border">Active</span>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-muted small">No direct reports assigned. You have system-wide manager privileges.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="col-lg-8">
+      <div class="card shadow-sm p-4 h-100">
+        <h5 class="fw-bold mb-3"><i class="bi bi-activity text-primary"></i> Team Request Stream</h5>
+        {% if team_requests %}
+        <div class="table-responsive">
+          <table class="table table-hover table-sm align-middle">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Employee</th>
+                <th>Title</th>
+                <th>Status</th>
+                <th>View</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for req in team_requests %}
+              <tr>
+                <td>#{{ req.id }}</td>
+                <td>{{ req.employee.user.name if req.employee and req.employee.user else 'Staff' }}</td>
+                <td><span class="fw-semibold">{{ req.title }}</span></td>
+                <td>
+                  <span class="badge bg-{{ 'success' if req.status == 'completed' else ('danger' if req.status == 'rejected' else 'primary') }}">
+                    {{ req.status.upper() }}
+                  </span>
+                </td>
+                <td>
+                  <a href="{{ url_for('employee.request_detail', id=req.id) }}" class="btn btn-sm btn-light border py-0">Track</a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <p class="text-muted small">No team activity yet.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

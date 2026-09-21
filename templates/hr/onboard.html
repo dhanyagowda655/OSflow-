@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Onboard New Employee — FlowOS{% endblock %}
+{% block header_title %}Initiate Employee Onboarding{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-md-8 col-lg-7">
+    <div class="card shadow-sm p-4 p-md-5">
+      <div class="d-flex align-items-center gap-3 mb-4">
+        <div class="p-3 bg-info-subtle text-info rounded-circle">
+          <i class="bi bi-person-plus-fill fs-3"></i>
+        </div>
+        <div>
+          <h4 class="fw-bold mb-0">Onboard New Team Member</h4>
+          <span class="text-muted small">Auto-executes full 7-step onboarding DAG across HR, IT, Finance, and Management</span>
+        </div>
+      </div>
+
+      <form method="POST" action="{{ url_for('hr.onboard_employee') }}">
+        {{ form.hidden_tag() }}
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label small fw-semibold">Full Name</label>
+            {{ form.name(class="form-control", placeholder="e.g. Alex Morgan") }}
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label class="form-label small fw-semibold">Work Email</label>
+            {{ form.email(class="form-control", placeholder="alex.m@company.com") }}
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label class="form-label small fw-semibold">Department</label>
+            {{ form.department_id(class="form-select") }}
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label class="form-label small fw-semibold">Job Designation</label>
+            {{ form.designation(class="form-control", placeholder="Senior Cloud Architect") }}
+          </div>
+
+          <div class="col-md-12 mb-3">
+            <label class="form-label small fw-semibold">Reporting Manager</label>
+            {{ form.manager_id(class="form-select") }}
+          </div>
+
+          <div class="col-md-12 mb-4">
+            <label class="form-label small fw-semibold">Special Onboarding Instructions</label>
+            {{ form.notes(class="form-control", rows="3") }}
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center">
+          <a href="{{ url_for('hr.dashboard') }}" class="btn btn-light">Cancel</a>
+          {{ form.submit(class="btn btn-primary btn-gradient px-4") }}
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

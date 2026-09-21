@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Register Account — FlowOS{% endblock %}
+{% block unauth_content %}
+<div class="container py-5">
+  <div class="row justify-content-center" style="min-height: 80vh;">
+    <div class="col-12 col-md-8 col-lg-6">
+      <div class="text-center mb-4">
+        <h3 class="fw-bold text-dark">Join FlowOS</h3>
+        <p class="text-muted small">Create an enterprise workspace account</p>
+      </div>
+
+      <div class="card shadow-sm p-4 p-md-5 mb-4">
+        <form method="POST" action="{{ url_for('auth.register') }}">
+          {{ form.hidden_tag() }}
+          
+          <div class="row">
+            <div class="col-md-12 mb-3">
+              <label class="form-label small fw-semibold">Full Name</label>
+              {{ form.name(class="form-control", placeholder="Jane Doe") }}
+            </div>
+            <div class="col-md-12 mb-3">
+              <label class="form-label small fw-semibold">Work Email</label>
+              {{ form.email(class="form-control", placeholder="jane@company.com") }}
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label small fw-semibold">Role</label>
+              {{ form.role(class="form-select") }}
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label small fw-semibold">Department</label>
+              {{ form.department_id(class="form-select") }}
+            </div>
+            <div class="col-md-12 mb-3">
+              <label class="form-label small fw-semibold">Designation</label>
+              {{ form.designation(class="form-control", placeholder="Senior Engineer / Product Manager") }}
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label small fw-semibold">Password</label>
+              {{ form.password(class="form-control", placeholder="••••••••") }}
+            </div>
+            <div class="col-md-6 mb-4">
+              <label class="form-label small fw-semibold">Confirm Password</label>
+              {{ form.confirm_password(class="form-control", placeholder="••••••••") }}
+            </div>
+          </div>
+
+          <div class="d-grid mb-3">
+            {{ form.submit(class="btn btn-primary btn-gradient py-2 fw-semibold") }}
+          </div>
+
+          <div class="text-center">
+            <span class="text-muted small">Already have an account? </span>
+            <a href="{{ url_for('auth.login') }}" class="small fw-semibold text-decoration-none">Sign in here</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

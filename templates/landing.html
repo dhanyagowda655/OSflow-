@@ -1,0 +1,810 @@
+{% extends "base.html" %}
+{% block title %}FlowOS — AI-Powered Enterprise Workflow Operating System{% endblock %}
+
+{% block unauth_content %}
+<!-- Landing Page Container -->
+<div class="landing-page">
+
+  <!-- Navigation Bar -->
+  <header class="landing-navbar sticky-top">
+    <div class="container d-flex align-items-center justify-content-between py-3">
+      <a href="{{ url_for('index') }}" class="d-flex align-items-center gap-2 text-decoration-none">
+        <div class="brand-icon-box shadow-sm">
+          <i class="bi bi-cpu-fill fs-4 text-white"></i>
+        </div>
+        <div>
+          <span class="brand-title fs-4 fw-bold">FlowOS</span>
+          <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill ms-2 small">v2.0 Enterprise</span>
+        </div>
+      </a>
+
+      <nav class="d-none d-lg-flex align-items-center gap-4">
+        <a href="#features" class="landing-nav-link">Capabilities</a>
+        <a href="#simulator" class="landing-nav-link">Live DAG Simulator</a>
+        <a href="#architecture" class="landing-nav-link">AI Architecture</a>
+        <a href="#actors" class="landing-nav-link">7 Enterprise Roles</a>
+        <a href="#workflows" class="landing-nav-link">Flagship Flows</a>
+      </nav>
+
+      <div class="d-flex align-items-center gap-2">
+        {% if current_user.is_authenticated %}
+          <a href="{{ url_for('employee.dashboard') if current_user.role == 'employee' else (url_for('manager.dashboard') if current_user.role == 'manager' else (url_for('hr.dashboard') if current_user.role == 'hr' else (url_for('it.dashboard') if current_user.role == 'it' else (url_for('finance.dashboard') if current_user.role == 'finance' else (url_for('procurement.dashboard') if current_user.role == 'procurement' else url_for('admin.dashboard')))))) }}" class="btn btn-primary btn-gradient px-4 rounded-pill fw-semibold shadow-sm">
+            <i class="bi bi-speedometer2 me-1"></i> My Dashboard
+          </a>
+        {% else %}
+          <a href="{{ url_for('auth.login') }}" class="btn btn-outline-secondary px-3 rounded-pill fw-semibold">
+            Sign In
+          </a>
+          <a href="#quick-login" class="btn btn-primary btn-gradient px-4 rounded-pill fw-semibold shadow-sm">
+            <i class="bi bi-lightning-charge-fill me-1"></i> Quick Demo
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero-section py-5 py-lg-6 position-relative overflow-hidden">
+    <div class="container position-relative z-1 py-4">
+      <div class="row align-items-center g-5">
+        
+        <div class="col-lg-7 text-center text-lg-start">
+          <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-white border shadow-sm mb-3">
+            <span class="pulse-dot"></span>
+            <span class="small fw-semibold text-primary">Multi-Agent DAG Orchestration Engine</span>
+          </div>
+
+          <h1 class="hero-headline fw-bold mb-3">
+            Intelligent Enterprise <br>
+            <span class="gradient-text">Process Automation</span> with AI
+          </h1>
+
+          <p class="hero-subtext text-muted fs-5 mb-4">
+            FlowOS transforms plain English requests into compiled <strong>Directed Acyclic Graphs (DAGs)</strong> executed by autonomous department agents — featuring parallel batching, self-healing retries, and human-in-the-loop governance.
+          </p>
+
+          <div class="d-flex flex-wrap gap-3 justify-content-center justify-content-lg-start mb-4">
+            <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-gradient btn-lg px-4 py-3 rounded-pill fw-bold shadow-sm d-flex align-items-center gap-2">
+              <i class="bi bi-rocket-takeoff-fill"></i> Launch Portal
+            </a>
+            <a href="#simulator" class="btn btn-light border btn-lg px-4 py-3 rounded-pill fw-bold d-flex align-items-center gap-2">
+              <i class="bi bi-play-circle-fill text-primary"></i> Try DAG Simulator
+            </a>
+            <a href="{{ url_for('auth.register') }}" class="btn btn-outline-dark btn-lg px-4 py-3 rounded-pill fw-bold">
+              Register User
+            </a>
+          </div>
+
+          <!-- Mini Badges Grid -->
+          <div class="row g-3 pt-3 border-top">
+            <div class="col-6 col-md-3">
+              <div class="metric-mini-card">
+                <div class="fw-bold fs-4 text-primary">7 Roles</div>
+                <div class="small text-muted">RBAC Portals</div>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="metric-mini-card">
+                <div class="fw-bold fs-4 text-success">100%</div>
+                <div class="small text-muted">Zero-Crash Cascade</div>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="metric-mini-card">
+                <div class="fw-bold fs-4 text-info">DAG</div>
+                <div class="small text-muted">Kahn's Topo Sorter</div>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="metric-mini-card">
+                <div class="fw-bold fs-4 text-warning">ML SLA</div>
+                <div class="small text-muted">Delay Prediction</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hero Interactive Preview Card -->
+        <div class="col-lg-5">
+          <div class="hero-preview-window shadow-lg border">
+            <div class="preview-header d-flex align-items-center justify-content-between p-3 border-bottom bg-white">
+              <div class="d-flex align-items-center gap-2">
+                <div class="traffic-light red"></div>
+                <div class="traffic-light yellow"></div>
+                <div class="traffic-light green"></div>
+                <span class="small fw-semibold ms-2 text-dark">Live AI Orchestration Preview</span>
+              </div>
+              <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill small">Active 24/7</span>
+            </div>
+            
+            <div class="preview-body p-4 bg-light">
+              <div class="nl-input-bubble mb-3 p-3 bg-white rounded-3 border shadow-sm">
+                <div class="d-flex align-items-center gap-2 mb-1">
+                  <i class="bi bi-chat-left-dots-fill text-primary"></i>
+                  <span class="small fw-bold text-muted text-uppercase">Natural Language Intent:</span>
+                </div>
+                <div class="small text-dark italic">
+                  "When new engineer joins: verify documents, set up corporate email, assign MacBook, grant GitHub access, schedule induction, notify manager, update payroll."
+                </div>
+              </div>
+
+              <!-- Animated DAG Steps Graph -->
+              <div class="dag-preview-flow">
+                <div class="dag-step-item done">
+                  <div class="step-indicator"><i class="bi bi-check2"></i></div>
+                  <div class="step-info">
+                    <div class="d-flex justify-content-between">
+                      <span class="step-title">1. Verify Documents</span>
+                      <span class="badge bg-info-subtle text-info">HR Agent</span>
+                    </div>
+                    <span class="small text-muted">Topological Root (Level 1)</span>
+                  </div>
+                </div>
+
+                <div class="dag-branch-connector">
+                  <span class="branch-label">Concurrent Level 2 (Parallel Dispatch)</span>
+                </div>
+
+                <div class="row g-2 mb-2">
+                  <div class="col-6">
+                    <div class="dag-step-item parallel in-progress">
+                      <div class="step-indicator"><i class="bi bi-arrow-repeat spin"></i></div>
+                      <div class="step-info">
+                        <span class="step-title d-block">2. Email Setup</span>
+                        <span class="badge bg-dark-subtle text-dark small">IT Agent</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <div class="dag-step-item parallel in-progress">
+                      <div class="step-indicator"><i class="bi bi-arrow-repeat spin"></i></div>
+                      <div class="step-info">
+                        <span class="step-title d-block">3. Laptop Assign</span>
+                        <span class="badge bg-dark-subtle text-dark small">IT Agent</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="dag-step-item pending">
+                  <div class="step-indicator"><i class="bi bi-hourglass-split"></i></div>
+                  <div class="step-info">
+                    <div class="d-flex justify-content-between">
+                      <span class="step-title">4. Manager Notice & Payroll</span>
+                      <span class="badge bg-success-subtle text-success">Finance</span>
+                    </div>
+                    <span class="small text-muted">Depends on Level 2</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-3 p-2 rounded bg-white border text-center">
+                <small class="text-muted"><i class="bi bi-shield-check text-success me-1"></i> Resilient 3-Tier Fallback Active</small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive Live DAG Simulator Sandbox -->
+  <section id="simulator" class="py-5 bg-white border-top border-bottom">
+    <div class="container py-4">
+      <div class="text-center max-w-700 mx-auto mb-5">
+        <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-1 fw-semibold mb-2">Interactive Simulation</span>
+        <h2 class="fw-bold display-6 mb-3">Experience Natural Language to DAG Compilation</h2>
+        <p class="text-muted fs-6">Click any enterprise workflow preset below to watch how FlowOS extracts tasks, dependencies, and topological levels in real-time.</p>
+      </div>
+
+      <!-- Preset Buttons -->
+      <div class="d-flex flex-wrap justify-content-center gap-2 mb-4">
+        <button type="button" class="btn btn-outline-primary active sim-preset-btn" onclick="loadSimPreset('onboarding')">
+          <i class="bi bi-person-plus-fill me-1"></i> Staff Onboarding
+        </button>
+        <button type="button" class="btn btn-outline-primary sim-preset-btn" onclick="loadSimPreset('laptop')">
+          <i class="bi bi-laptop-fill me-1"></i> Laptop Procurement
+        </button>
+        <button type="button" class="btn btn-outline-primary sim-preset-btn" onclick="loadSimPreset('leave')">
+          <i class="bi bi-calendar-check-fill me-1"></i> Leave Approval
+        </button>
+        <button type="button" class="btn btn-outline-primary sim-preset-btn" onclick="loadSimPreset('expense')">
+          <i class="bi bi-receipt-cutoff me-1"></i> Expense & OCR
+        </button>
+        <button type="button" class="btn btn-outline-primary sim-preset-btn" onclick="loadSimPreset('it_ticket')">
+          <i class="bi bi-ticket-detailed-fill me-1"></i> IT Support Desk
+        </button>
+      </div>
+
+      <!-- Simulator Interactive Screen -->
+      <div class="card shadow-sm border rounded-4 overflow-hidden">
+        <div class="card-header bg-light p-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-terminal-fill text-primary"></i>
+            <span class="fw-bold text-dark" id="simTitle">Standard Employee Onboarding DAG</span>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-primary-subtle text-primary border" id="simModel">Google Gemini 1.5 &bull; Kahn's Topo Sorter</span>
+            <button class="btn btn-sm btn-primary btn-gradient" onclick="runSimAnimation()"><i class="bi bi-play-fill"></i> Re-Simulate</button>
+          </div>
+        </div>
+
+        <div class="card-body p-4">
+          <div class="row g-4">
+            <!-- Left: Natural Language Input & JSON DAG -->
+            <div class="col-lg-5">
+              <label class="form-label small fw-bold text-uppercase text-muted">Input Requirement Prompt</label>
+              <div class="p-3 bg-light rounded-3 border mb-3">
+                <p class="small text-dark mb-0 font-monospace" id="simPromptText">
+                  "When a new employee joins: verify documents, create corporate email account, assign laptop, create GitHub account, schedule induction training, notify reporting manager, and update payroll."
+                </p>
+              </div>
+
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <label class="form-label small fw-bold text-uppercase text-muted mb-0">Compiled JSON DAG</label>
+                <span class="badge bg-secondary-subtle text-secondary small">Strict Schema</span>
+              </div>
+              <pre class="bg-dark text-success p-3 rounded-3 small mb-0" style="max-height: 240px; overflow-y: auto;" id="simJsonCode"></pre>
+            </div>
+
+            <!-- Right: Topological Level Visualizer -->
+            <div class="col-lg-7">
+              <label class="form-label small fw-bold text-uppercase text-muted">Topological Execution Levels (Parallel Batching)</label>
+              <div class="dag-levels-container p-3 bg-light rounded-3 border" id="simLevelsVisual" style="min-height: 340px;">
+                <!-- Dynamically generated by JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Core Pillars & Architectural Highlights -->
+  <section id="architecture" class="py-5 bg-light">
+    <div class="container py-4">
+      <div class="text-center max-w-700 mx-auto mb-5">
+        <span class="badge bg-info-subtle text-info border border-info-subtle rounded-pill px-3 py-1 fw-semibold mb-2">Engine Architecture</span>
+        <h2 class="fw-bold display-6 mb-3">Engineered for Zero Downtime & Resilience</h2>
+        <p class="text-muted fs-6">FlowOS guarantees 100% operational uptime through mathematical graph validation, fallback cascades, and state isolation.</p>
+      </div>
+
+      <div class="row g-4">
+        <!-- Pillar 1 -->
+        <div class="col-md-6 col-lg-3">
+          <div class="card h-100 p-4 border rounded-4 shadow-sm card-hover">
+            <div class="icon-circle bg-primary-subtle text-primary mb-3">
+              <i class="bi bi-diagram-3-fill fs-3"></i>
+            </div>
+            <h5 class="fw-bold mb-2">Kahn's Algorithm DAG</h5>
+            <p class="text-muted small mb-3">Validates dependencies, detects circular cycles, and groups independent tasks into concurrent execution batches.</p>
+            <div class="mt-auto">
+              <span class="badge bg-light text-dark border">Level Batching</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pillar 2 -->
+        <div class="col-md-6 col-lg-3">
+          <div class="card h-100 p-4 border rounded-4 shadow-sm card-hover">
+            <div class="icon-circle bg-success-subtle text-success mb-3">
+              <i class="bi bi-shield-lock-fill fs-3"></i>
+            </div>
+            <h5 class="fw-bold mb-2">3-Tier AI Cascade</h5>
+            <p class="text-muted small mb-3">Automatic failover from Google Gemini 1.5 &rarr; Mistral AI &rarr; Deterministic Rule Engine for 100% zero-crash guarantee.</p>
+            <div class="mt-auto">
+              <span class="badge bg-light text-dark border">Zero-Crash SLA</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pillar 3 -->
+        <div class="col-md-6 col-lg-3">
+          <div class="card h-100 p-4 border rounded-4 shadow-sm card-hover">
+            <div class="icon-circle bg-warning-subtle text-warning mb-3">
+              <i class="bi bi-arrow-clockwise fs-3"></i>
+            </div>
+            <h5 class="fw-bold mb-2">Self-Healing & Backoff</h5>
+            <p class="text-muted small mb-3">Exponential retries on transient faults (<code>min(2^n, 8s)</code>). Failed branches isolate while independent steps continue.</p>
+            <div class="mt-auto">
+              <span class="badge bg-light text-dark border">Branch Isolation</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pillar 4 -->
+        <div class="col-md-6 col-lg-3">
+          <div class="card h-100 p-4 border rounded-4 shadow-sm card-hover">
+            <div class="icon-circle bg-info-subtle text-info mb-3">
+              <i class="bi bi-graph-up-arrow fs-3"></i>
+            </div>
+            <h5 class="fw-bold mb-2">ML SLA & OCR Vision</h5>
+            <p class="text-muted small mb-3"><code>scikit-learn</code> GradientBoosting delay prediction, vector similarity template reuse, and receipt OCR field parsing.</p>
+            <div class="mt-auto">
+              <span class="badge bg-light text-dark border">Predictive ML</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 Enterprise Roles Showcase & 1-Click Login -->
+  <section id="actors" class="py-5 bg-white">
+    <div class="container py-4">
+      <div class="text-center max-w-700 mx-auto mb-5">
+        <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-1 fw-semibold mb-2">Role-Based Access Control</span>
+        <h2 class="fw-bold display-6 mb-3">7 Specialized Enterprise Portals</h2>
+        <p class="text-muted fs-6">Every department operates inside its own secure, role-gated workspace protected by <code>@roles_required</code>.</p>
+      </div>
+
+      <div class="row g-4" id="quick-login">
+        
+        <!-- Role 1: Employee -->
+        <div class="col-md-6 col-lg-4">
+          <div class="role-card border rounded-4 p-4 shadow-sm h-100 d-flex flex-column">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+              <div class="d-flex align-items-center gap-3">
+                <div class="role-avatar bg-secondary text-white fw-bold">AR</div>
+                <div>
+                  <h6 class="fw-bold mb-0">Alex Rivera</h6>
+                  <span class="badge bg-secondary">Employee</span>
+                </div>
+              </div>
+              <i class="bi bi-person-workspace fs-3 text-secondary"></i>
+            </div>
+            <p class="small text-muted mb-3 flex-grow-1">Submits natural-language requests, leave applications, hardware requests, expense claims, and tracks real-time progress.</p>
+            <form method="POST" action="{{ url_for('auth.login') }}" class="mt-auto">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="email" value="employee@flowos.demo">
+              <input type="hidden" name="password" value="Demo@123">
+              <button type="submit" class="btn btn-outline-secondary w-100 fw-semibold btn-sm py-2">
+                <i class="bi bi-box-arrow-in-right me-1"></i> Login as Employee
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Role 2: Manager -->
+        <div class="col-md-6 col-lg-4">
+          <div class="role-card border rounded-4 p-4 shadow-sm h-100 d-flex flex-column border-primary-subtle">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+              <div class="d-flex align-items-center gap-3">
+                <div class="role-avatar bg-primary text-white fw-bold">SC</div>
+                <div>
+                  <h6 class="fw-bold mb-0">Sarah Connor</h6>
+                  <span class="badge bg-primary">Manager</span>
+                </div>
+              </div>
+              <i class="bi bi-check2-circle fs-3 text-primary"></i>
+            </div>
+            <p class="small text-muted mb-3 flex-grow-1">Human-in-the-Loop approval queue. Reviews and authorizes team leave, hardware requests, and expense claims to advance workflows.</p>
+            <form method="POST" action="{{ url_for('auth.login') }}" class="mt-auto">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="email" value="manager@flowos.demo">
+              <input type="hidden" name="password" value="Demo@123">
+              <button type="submit" class="btn btn-primary btn-gradient w-100 fw-semibold btn-sm py-2 shadow-sm">
+                <i class="bi bi-box-arrow-in-right me-1"></i> Login as Manager
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Role 3: HR Specialist -->
+        <div class="col-md-6 col-lg-4">
+          <div class="role-card border rounded-4 p-4 shadow-sm h-100 d-flex flex-column">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+              <div class="d-flex align-items-center gap-3">
+                <div class="role-avatar bg-info text-dark fw-bold">EW</div>
+                <div>
+                  <h6 class="fw-bold mb-0">Emma Watson</h6>
+                  <span class="badge bg-info text-dark">HR Specialist</span>
+                </div>
+              </div>
+              <i class="bi bi-people-fill fs-3 text-info"></i>
+            </div>
+            <p class="small text-muted mb-3 flex-grow-1">7-Step automated employee onboarding wizard, staff directory management, leave balances overview, and Natural Language Workflow Studio.</p>
+            <form method="POST" action="{{ url_for('auth.login') }}" class="mt-auto">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="email" value="hr@flowos.demo">
+              <input type="hidden" name="password" value="Demo@123">
+              <button type="submit" class="btn btn-outline-info text-dark w-100 fw-semibold btn-sm py-2">
+                <i class="bi bi-box-arrow-in-right me-1"></i> Login as HR
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Role 4: IT Support -->
+        <div class="col-md-6 col-lg-4">
+          <div class="role-card border rounded-4 p-4 shadow-sm h-100 d-flex flex-column">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+              <div class="d-flex align-items-center gap-3">
+                <div class="role-avatar bg-dark text-white fw-bold">DM</div>
+                <div>
+                  <h6 class="fw-bold mb-0">David Miller</h6>
+                  <span class="badge bg-dark">IT Support</span>
+                </div>
+              </div>
+              <i class="bi bi-laptop-fill fs-3 text-dark"></i>
+            </div>
+            <p class="small text-muted mb-3 flex-grow-1">AI ticket triage desk, ticket resolution, Active Directory corporate email provisioning, and hardware fleet asset inventory tracking.</p>
+            <form method="POST" action="{{ url_for('auth.login') }}" class="mt-auto">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="email" value="it@flowos.demo">
+              <input type="hidden" name="password" value="Demo@123">
+              <button type="submit" class="btn btn-outline-dark w-100 fw-semibold btn-sm py-2">
+                <i class="bi bi-box-arrow-in-right me-1"></i> Login as IT Support
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Role 5: Finance Controller -->
+        <div class="col-md-6 col-lg-4">
+          <div class="role-card border rounded-4 p-4 shadow-sm h-100 d-flex flex-column">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+              <div class="d-flex align-items-center gap-3">
+                <div class="role-avatar bg-success text-white fw-bold">MC</div>
+                <div>
+                  <h6 class="fw-bold mb-0">Michael Chang</h6>
+                  <span class="badge bg-success">Finance</span>
+                </div>
+              </div>
+              <i class="bi bi-cash-coin fs-3 text-success"></i>
+            </div>
+            <p class="small text-muted mb-3 flex-grow-1">OCR receipt verification, duplicate claim detection, policy compliance audits, budget authorizations, and reimbursement payouts.</p>
+            <form method="POST" action="{{ url_for('auth.login') }}" class="mt-auto">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="email" value="finance@flowos.demo">
+              <input type="hidden" name="password" value="Demo@123">
+              <button type="submit" class="btn btn-outline-success w-100 fw-semibold btn-sm py-2">
+                <i class="bi bi-box-arrow-in-right me-1"></i> Login as Finance
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Role 6: Procurement Specialist -->
+        <div class="col-md-6 col-lg-4">
+          <div class="role-card border rounded-4 p-4 shadow-sm h-100 d-flex flex-column">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+              <div class="d-flex align-items-center gap-3">
+                <div class="role-avatar bg-warning text-dark fw-bold">RG</div>
+                <div>
+                  <h6 class="fw-bold mb-0">Rachel Green</h6>
+                  <span class="badge bg-warning text-dark">Procurement</span>
+                </div>
+              </div>
+              <i class="bi bi-box-seam-fill fs-3 text-warning"></i>
+            </div>
+            <p class="small text-muted mb-3 flex-grow-1">Hardware purchase order generation, supplier allocation, courier fulfillment, and tracking dispatch management.</p>
+            <form method="POST" action="{{ url_for('auth.login') }}" class="mt-auto">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="email" value="procurement@flowos.demo">
+              <input type="hidden" name="password" value="Demo@123">
+              <button type="submit" class="btn btn-outline-warning text-dark w-100 fw-semibold btn-sm py-2">
+                <i class="bi bi-box-arrow-in-right me-1"></i> Login as Procurement
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Role 7: Super Admin -->
+        <div class="col-12">
+          <div class="role-card border rounded-4 p-4 shadow-sm bg-dark text-white d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div class="d-flex align-items-center gap-3">
+              <div class="role-avatar bg-danger text-white fw-bold">AD</div>
+              <div>
+                <h5 class="fw-bold mb-1">System Administrator <span class="badge bg-danger ms-2">Superuser</span></h5>
+                <p class="text-secondary small mb-0">Unrestricted access across all portals: User management, AI audit trail logs, live AI health pings, and ML Chart.js analytics.</p>
+              </div>
+            </div>
+            <form method="POST" action="{{ url_for('auth.login') }}" class="d-inline">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="email" value="admin@flowos.demo">
+              <input type="hidden" name="password" value="Demo@123">
+              <button type="submit" class="btn btn-danger px-4 py-2 rounded-pill fw-bold">
+                <i class="bi bi-shield-lock-fill me-1"></i> Launch Super Admin Portal
+              </button>
+            </form>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Flagship Business Workflows -->
+  <section id="workflows" class="py-5 bg-light border-top">
+    <div class="container py-4">
+      <div class="text-center max-w-700 mx-auto mb-5">
+        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1 fw-semibold mb-2">Pre-Configured Flows</span>
+        <h2 class="fw-bold display-6 mb-3">5 Flagship Enterprise Automations</h2>
+        <p class="text-muted fs-6">Every business flow connects multiple department agents with deterministic verification and audit logging.</p>
+      </div>
+
+      <div class="row g-4">
+        <!-- Flow 1 -->
+        <div class="col-lg-6">
+          <div class="card h-100 p-4 border rounded-4 shadow-sm bg-white">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="step-num-badge">1</div>
+              <h5 class="fw-bold mb-0">Standard Staff Onboarding</h5>
+            </div>
+            <p class="text-muted small mb-3">Triggered automatically when HR registers a new hire. Verifies identity documents, sets up Active Directory email, provisions laptop, grants GitHub access, schedules induction, and notifies payroll.</p>
+            <div class="d-flex flex-wrap gap-1">
+              <span class="badge bg-light text-dark border">HR Verify</span> &rarr;
+              <span class="badge bg-light text-dark border">IT Email</span> &rarr;
+              <span class="badge bg-light text-dark border">IT Laptop</span> &rarr;
+              <span class="badge bg-light text-dark border">Induction</span> &rarr;
+              <span class="badge bg-light text-dark border">Payroll</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Flow 2 -->
+        <div class="col-lg-6">
+          <div class="card h-100 p-4 border rounded-4 shadow-sm bg-white">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="step-num-badge">2</div>
+              <h5 class="fw-bold mb-0">Hardware & Laptop Procurement</h5>
+            </div>
+            <p class="text-muted small mb-3">Full cross-department hardware procurement lifecycle. Employee requests MacBook &rarr; Manager reviews &rarr; Finance checks budget &rarr; Procurement creates Purchase Order &rarr; IT configures OS &rarr; Courier dispatch.</p>
+            <div class="d-flex flex-wrap gap-1">
+              <span class="badge bg-light text-dark border">Employee</span> &rarr;
+              <span class="badge bg-light text-dark border">Manager Approval</span> &rarr;
+              <span class="badge bg-light text-dark border">Finance Check</span> &rarr;
+              <span class="badge bg-light text-dark border">Procurement PO</span> &rarr;
+              <span class="badge bg-light text-dark border">IT Provision</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Flow 3 -->
+        <div class="col-lg-4">
+          <div class="card h-100 p-4 border rounded-4 shadow-sm bg-white">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="step-num-badge">3</div>
+              <h5 class="fw-bold mb-0">Leave Approval</h5>
+            </div>
+            <p class="text-muted small mb-3">Validates leave balances &rarr; Routes to Manager for review &rarr; Deducts annual days from HR ledger &rarr; Syncs payroll.</p>
+            <div class="small text-muted mt-auto"><i class="bi bi-clock-history me-1"></i> Balance auto-deduction</div>
+          </div>
+        </div>
+
+        <!-- Flow 4 -->
+        <div class="col-lg-4">
+          <div class="card h-100 p-4 border rounded-4 shadow-sm bg-white">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="step-num-badge">4</div>
+              <h5 class="fw-bold mb-0">Expense & OCR</h5>
+            </div>
+            <p class="text-muted small mb-3">Image/PDF upload &rarr; OCR text extraction &rarr; Regex field parsing &rarr; Duplicate claim detection &rarr; Manager approval &rarr; Payout.</p>
+            <div class="small text-muted mt-auto"><i class="bi bi-camera-fill me-1"></i> OCR & Duplicate Alert</div>
+          </div>
+        </div>
+
+        <!-- Flow 5 -->
+        <div class="col-lg-4">
+          <div class="card h-100 p-4 border rounded-4 shadow-sm bg-white">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="step-num-badge">5</div>
+              <h5 class="fw-bold mb-0">IT Support Desk</h5>
+            </div>
+            <p class="text-muted small mb-3">AI categorization into Hardware, Software, Access, or Network &rarr; Routing to specialist &rarr; Automated resolution notice.</p>
+            <div class="small text-muted mt-auto"><i class="bi bi-magic me-1"></i> Auto-Classification</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Banner -->
+  <section class="py-5 bg-dark text-white text-center">
+    <div class="container py-4">
+      <h2 class="fw-bold display-6 mb-3">Ready to Experience Intelligent Enterprise Automation?</h2>
+      <p class="text-secondary fs-6 mb-4 max-w-700 mx-auto">Explore the live application now with instant 1-click credentials for all 7 organizational roles.</p>
+      <div class="d-flex flex-wrap justify-content-center gap-3">
+        <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-gradient btn-lg px-5 py-3 rounded-pill fw-bold shadow">
+          <i class="bi bi-door-open-fill me-1"></i> Sign In to Portal
+        </a>
+        <a href="{{ url_for('auth.register') }}" class="btn btn-outline-light btn-lg px-5 py-3 rounded-pill fw-bold">
+          <i class="bi bi-person-plus-fill me-1"></i> Create New Account
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="py-4 bg-black text-secondary border-top border-secondary small">
+    <div class="container d-flex flex-wrap justify-content-between align-items-center gap-2">
+      <div class="d-flex align-items-center gap-2">
+        <i class="bi bi-cpu-fill text-primary"></i>
+        <span class="text-white fw-bold">FlowOS</span> &bull; <span>AI-Powered Workflow Operating System</span>
+      </div>
+      <div>
+        <span>Flask 3 &bull; SQLAlchemy 2.0 &bull; Multi-Agent DAG &bull; Gemini / Mistral &bull; Bootstrap 5</span>
+      </div>
+    </div>
+  </footer>
+
+</div>
+
+<!-- Interactive Simulator Javascript -->
+<script>
+const simPresets = {
+  onboarding: {
+    title: "Standard Employee Onboarding DAG",
+    prompt: "When a new employee joins: verify documents, create corporate email account, assign laptop, create GitHub account, schedule induction training, notify reporting manager, and update payroll.",
+    model: "Google Gemini 1.5 Flash • Kahn's Topo Sorter",
+    json: {
+      "workflow_name": "Standard Employee Onboarding",
+      "tasks": [
+        {"id": "t1", "name": "Verify Employee Documents", "agent_type": "hr", "depends_on": []},
+        {"id": "t2", "name": "Create Corporate Email Account", "agent_type": "it", "depends_on": ["t1"]},
+        {"id": "t3", "name": "Assign Workstation & Laptop", "agent_type": "it", "depends_on": ["t1"]},
+        {"id": "t4", "name": "Provision GitHub & Cloud Access", "agent_type": "it", "depends_on": ["t2"]},
+        {"id": "t5", "name": "Schedule Orientation & Induction", "agent_type": "hr", "depends_on": ["t1"]},
+        {"id": "t6", "name": "Notify Reporting Manager", "agent_type": "notification", "depends_on": ["t3", "t4", "t5"]},
+        {"id": "t7", "name": "Enroll in Payroll & Benefits", "agent_type": "finance", "depends_on": ["t6"]}
+      ]
+    },
+    levels: [
+      { name: "Level 1 (Independent Root)", tasks: [{ id: "t1", name: "Verify Employee Documents", agent: "hr" }] },
+      { name: "Level 2 (Parallel Concurrent Batch)", tasks: [
+        { id: "t2", name: "Create Corporate Email Account", agent: "it" },
+        { id: "t3", name: "Assign Workstation & Laptop", agent: "it" },
+        { id: "t5", name: "Schedule Orientation & Induction", agent: "hr" }
+      ]},
+      { name: "Level 3 (Dependent on Level 2)", tasks: [
+        { id: "t4", name: "Provision GitHub & Cloud Access", agent: "it" }
+      ]},
+      { name: "Level 4 (Convergence)", tasks: [
+        { id: "t6", name: "Notify Reporting Manager", agent: "notification" }
+      ]},
+      { name: "Level 5 (Final Settlement)", tasks: [
+        { id: "t7", name: "Enroll in Payroll & Benefits", agent: "finance" }
+      ]}
+    ]
+  },
+  laptop: {
+    title: "Hardware & Laptop Procurement DAG",
+    prompt: "Hardware laptop provisioning request for MacBook Pro 14: manager review and approval, finance budget and policy check, procurement purchase order fulfillment, IT hardware configuration and OS imaging, dispatch notification.",
+    model: "Google Gemini 1.5 Flash • Kahn's Topo Sorter",
+    json: {
+      "workflow_name": "Hardware & Laptop Procurement",
+      "tasks": [
+        {"id": "t1", "name": "Manager Review & Approval", "agent_type": "manager", "depends_on": []},
+        {"id": "t2", "name": "Finance Budget & Policy Check", "agent_type": "finance", "depends_on": ["t1"]},
+        {"id": "t3", "name": "Procurement Purchase Order Fulfillment", "agent_type": "procurement", "depends_on": ["t2"]},
+        {"id": "t4", "name": "IT Hardware Configuration & OS Imaging", "agent_type": "it", "depends_on": ["t3"]},
+        {"id": "t5", "name": "Dispatch Notification & Asset Confirmation", "agent_type": "notification", "depends_on": ["t4"]}
+      ]
+    },
+    levels: [
+      { name: "Level 1 (Human Governance)", tasks: [{ id: "t1", name: "Manager Review & Approval", agent: "manager" }] },
+      { name: "Level 2 (Budget Clearance)", tasks: [{ id: "t2", name: "Finance Budget Check", agent: "finance" }] },
+      { name: "Level 3 (Supply Chain)", tasks: [{ id: "t3", name: "Procurement PO Fulfillment", agent: "procurement" }] },
+      { name: "Level 4 (IT Fleet)", tasks: [{ id: "t4", name: "IT OS Imaging & Config", agent: "it" }] },
+      { name: "Level 5 (Dispatch Alert)", tasks: [{ id: "t5", name: "Courier Notification", agent: "notification" }] }
+    ]
+  },
+  leave: {
+    title: "Employee Leave Application DAG",
+    prompt: "Employee requesting 3 days vacation: validate leave balance, manager approval review, update HR leave records, payroll adjustment check, send confirmation notification.",
+    model: "Google Gemini 1.5 Flash • Kahn's Topo Sorter",
+    json: {
+      "workflow_name": "Employee Leave Approval",
+      "tasks": [
+        {"id": "t1", "name": "Validate Leave Balance", "agent_type": "hr", "depends_on": []},
+        {"id": "t2", "name": "Manager Approval Review", "agent_type": "manager", "depends_on": ["t1"]},
+        {"id": "t3", "name": "Update HR Leave Records", "agent_type": "hr", "depends_on": ["t2"]},
+        {"id": "t4", "name": "Payroll Adjustment Check", "agent_type": "finance", "depends_on": ["t3"]},
+        {"id": "t5", "name": "Send Confirmation Notification", "agent_type": "notification", "depends_on": ["t4"]}
+      ]
+    },
+    levels: [
+      { name: "Level 1 (Balance Verification)", tasks: [{ id: "t1", name: "Validate Leave Balance", agent: "hr" }] },
+      { name: "Level 2 (Manager Gate)", tasks: [{ id: "t2", name: "Manager Approval Review", agent: "manager" }] },
+      { name: "Level 3 (HR Ledger Update)", tasks: [{ id: "t3", name: "Update HR Leave Records", agent: "hr" }] },
+      { name: "Level 4 (Finance Check)", tasks: [{ id: "t4", name: "Payroll Adjustment Check", agent: "finance" }] },
+      { name: "Level 5 (Alert)", tasks: [{ id: "t5", name: "Send Confirmation", agent: "notification" }] }
+    ]
+  },
+  expense: {
+    title: "Expense Reimbursement & OCR DAG",
+    prompt: "Expense reimbursement claim for $450 at Delta: OCR receipt verification and duplicate check, manager authorization, finance audit and policy compliance, disburse payment and notify employee.",
+    model: "Google Gemini 1.5 Flash • Kahn's Topo Sorter",
+    json: {
+      "workflow_name": "Expense Reimbursement",
+      "tasks": [
+        {"id": "t1", "name": "OCR Receipt Verification & Duplicate Check", "agent_type": "finance", "depends_on": []},
+        {"id": "t2", "name": "Manager Authorization", "agent_type": "manager", "depends_on": ["t1"]},
+        {"id": "t3", "name": "Finance Audit & Policy Compliance", "agent_type": "finance", "depends_on": ["t2"]},
+        {"id": "t4", "name": "Disburse Payment & Notify Employee", "agent_type": "notification", "depends_on": ["t3"]}
+      ]
+    },
+    levels: [
+      { name: "Level 1 (OCR Extraction & Duplicate Scan)", tasks: [{ id: "t1", name: "OCR & Duplicate Check", agent: "finance" }] },
+      { name: "Level 2 (Manager Authorization)", tasks: [{ id: "t2", name: "Manager Review", agent: "manager" }] },
+      { name: "Level 3 (Finance Policy Audit)", tasks: [{ id: "t3", name: "Finance Audit", agent: "finance" }] },
+      { name: "Level 4 (Disbursement & Notice)", tasks: [{ id: "t4", name: "Disburse Payment", agent: "notification" }] }
+    ]
+  },
+  it_ticket: {
+    title: "IT Support Incident Resolution DAG",
+    prompt: "IT Support ticket for VPN disconnect: AI ticket categorization and priority routing, IT engineer investigation and fix, resolution confirmation and user notification.",
+    model: "Google Gemini 1.5 Flash • Kahn's Topo Sorter",
+    json: {
+      "workflow_name": "IT Support Resolution",
+      "tasks": [
+        {"id": "t1", "name": "AI Ticket Categorization & Priority Routing", "agent_type": "it", "depends_on": []},
+        {"id": "t2", "name": "IT Engineer Investigation & Fix", "agent_type": "it", "depends_on": ["t1"]},
+        {"id": "t3", "name": "Resolution Confirmation & User Notification", "agent_type": "notification", "depends_on": ["t2"]}
+      ]
+    },
+    levels: [
+      { name: "Level 1 (AI Ticket Classification)", tasks: [{ id: "t1", name: "AI Categorization", agent: "it" }] },
+      { name: "Level 2 (Engineer Resolution)", tasks: [{ id: "t2", name: "Engineer Diagnostics & Fix", agent: "it" }] },
+      { name: "Level 3 (Resolution Notice)", tasks: [{ id: "t3", name: "User Confirmation", agent: "notification" }] }
+    ]
+  }
+};
+
+let currentSimKey = 'onboarding';
+
+function loadSimPreset(key) {
+  currentSimKey = key;
+  document.querySelectorAll('.sim-preset-btn').forEach(b => b.classList.remove('active'));
+  if (event && event.currentTarget) event.currentTarget.classList.add('active');
+
+  const data = simPresets[key];
+  document.getElementById('simTitle').innerText = data.title;
+  document.getElementById('simPromptText').innerText = `"${data.prompt}"`;
+  document.getElementById('simModel').innerText = data.model;
+  document.getElementById('simJsonCode').innerText = JSON.stringify(data.json, null, 2);
+
+  renderSimLevels(data.levels);
+}
+
+function renderSimLevels(levels) {
+  const container = document.getElementById('simLevelsVisual');
+  container.innerHTML = '';
+
+  levels.forEach((lvl, idx) => {
+    const lvlCard = document.createElement('div');
+    lvlCard.className = 'sim-level-card mb-3 p-3 bg-white rounded-3 border shadow-sm';
+    
+    let tasksHtml = lvl.tasks.map(t => `
+      <div class="sim-task-node p-2 rounded border bg-light d-flex align-items-center justify-content-between mb-1">
+        <div class="d-flex align-items-center gap-2">
+          <span class="badge bg-secondary font-monospace">${t.id}</span>
+          <span class="small fw-semibold text-dark">${t.name}</span>
+        </div>
+        <span class="badge bg-primary-subtle text-primary border">${t.agent.toUpperCase()} Agent</span>
+      </div>
+    `).join('');
+
+    lvlCard.innerHTML = `
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <span class="small fw-bold text-primary">${lvl.name}</span>
+        <span class="badge bg-success-subtle text-success small">Ready</span>
+      </div>
+      <div>${tasksHtml}</div>
+    `;
+    container.appendChild(lvlCard);
+  });
+}
+
+function runSimAnimation() {
+  loadSimPreset(currentSimKey);
+}
+
+// Initial boot
+document.addEventListener('DOMContentLoaded', () => {
+  loadSimPreset('onboarding');
+});
+</script>
+{% endblock %}

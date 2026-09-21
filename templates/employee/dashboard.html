@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+{% block title %}Employee Dashboard — FlowOS{% endblock %}
+{% block header_title %}Employee Portal{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+  
+  <!-- Welcome Banner -->
+  <div class="card bg-dark text-white p-4 mb-4 border-0 shadow-sm" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <h4 class="fw-bold mb-1">Hello, {{ current_user.name }}!</h4>
+        <p class="text-light opacity-75 small mb-0">Describe what you need in plain English below, or choose a department quick action.</p>
+      </div>
+      <div class="col-md-4 text-md-end mt-3 mt-md-0">
+        <span class="badge bg-primary px-3 py-2 fs-6"><i class="bi bi-person-badge"></i> {{ current_user.role.title() }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI Natural Language Prompt Card (Core Feature) -->
+  <div class="card shadow-sm p-4 mb-4 border-primary border-2">
+    <div class="d-flex align-items-center gap-2 mb-2">
+      <i class="bi bi-stars text-primary fs-4"></i>
+      <h5 class="fw-bold mb-0">AI Workflow Assistant</h5>
+    </div>
+    <p class="text-muted small mb-3">Type any request in natural language. Our multi-tier LLM engine will convert it into a deterministic task DAG and dispatch to department AI agents.</p>
+    
+    <form method="POST" action="{{ url_for('employee.request_custom') }}">
+      {{ custom_form.hidden_tag() }}
+      <div class="mb-3">
+        {{ custom_form.prompt(class="form-control", rows="2", placeholder="e.g., 'Need a 4K external monitor and ergonomic chair for my new office desk', or 'Taking 3 days off next week for family vacation'") }}
+      </div>
+      <div class="d-flex justify-content-between align-items-center">
+        <span class="text-muted small"><i class="bi bi-shield-check text-success"></i> Auto-fallback guaranteed (Gemini &rarr; Mistral &rarr; Rule Engine)</span>
+        {{ custom_form.submit(class="btn btn-primary btn-gradient px-4") }}
+      </div>
+    </form>
+  </div>
+
+  <!-- Quick Action Cards -->
+  <h6 class="fw-bold text-muted text-uppercase mb-3 small">Quick Action Portals</h6>
+  <div class="row g-3 mb-4">
+    <!-- Leave -->
+    <div class="col-12 col-sm-6 col-xl-3">
+      <a href="{{ url_for('employee.request_leave') }}" class="text-decoration-none">
+        <div class="card card-hover h-100 p-3">
+          <div class="d-flex align-items-center gap-3">
+            <div class="p-3 bg-info-subtle text-info rounded-circle">
+              <i class="bi bi-calendar-check-fill fs-4"></i>
+            </div>
+            <div>
+              <h6 class="fw-bold text-dark mb-1">Apply for Leave</h6>
+              <span class="text-muted small">Annual, sick, or casual time off</span>
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <!-- Laptop -->
+    <div class="col-12 col-sm-6 col-xl-3">
+      <a href="{{ url_for('employee.request_laptop') }}" class="text-decoration-none">
+        <div class="card card-hover h-100 p-3">
+          <div class="d-flex align-items-center gap-3">
+            <div class="p-3 bg-primary-subtle text-primary rounded-circle">
+              <i class="bi bi-laptop-fill fs-4"></i>
+            </div>
+            <div>
+              <h6 class="fw-bold text-dark mb-1">Request Laptop</h6>
+              <span class="text-muted small">Hardware & equipment chain</span>
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <!-- IT Ticket -->
+    <div class="col-12 col-sm-6 col-xl-3">
+      <a href="{{ url_for('employee.request_it_ticket') }}" class="text-decoration-none">
+        <div class="card card-hover h-100 p-3">
+          <div class="d-flex align-items-center gap-3">
+            <div class="p-3 bg-danger-subtle text-danger rounded-circle">
+              <i class="bi bi-tools fs-4"></i>
+            </div>
+            <div>
+              <h6 class="fw-bold text-dark mb-1">IT Support</h6>
+              <span class="text-muted small">AI triage & engineer routing</span>
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <!-- Expense -->
+    <div class="col-12 col-sm-6 col-xl-3">
+      <a href="{{ url_for('employee.request_expense') }}" class="text-decoration-none">
+        <div class="card card-hover h-100 p-3">
+          <div class="d-flex align-items-center gap-3">
+            <div class="p-3 bg-success-subtle text-success rounded-circle">
+              <i class="bi bi-receipt fs-4"></i>
+            </div>
+            <div>
+              <h6 class="fw-bold text-dark mb-1">Claim Expense</h6>
+              <span class="text-muted small">OCR receipt scan & audit</span>
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Stats & Leave Balance Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="card p-3 stat-card">
+        <div class="text-muted small fw-semibold">Total Requests</div>
+        <h3 class="fw-bold text-dark mt-1 mb-0">{{ total_reqs }}</h3>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card p-3" style="border-left: 4px solid var(--success);">
+        <div class="text-muted small fw-semibold">Completed Workflows</div>
+        <h3 class="fw-bold text-success mt-1 mb-0">{{ completed_reqs }}</h3>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card p-3" style="border-left: 4px solid var(--warning);">
+        <div class="text-muted small fw-semibold">In-Progress Tasks</div>
+        <h3 class="fw-bold text-warning mt-1 mb-0">{{ pending_reqs }}</h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Requests Table -->
+  <div class="card shadow-sm p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="fw-bold mb-0">Recent Requests & Live Tracking</h5>
+      <a href="{{ url_for('employee.requests_list') }}" class="btn btn-sm btn-outline-primary">View All</a>
+    </div>
+
+    {% if recent_requests %}
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>Type</th>
+            <th>Title</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in recent_requests %}
+          <tr>
+            <td><span class="fw-bold text-secondary">#{{ r.id }}</span></td>
+            <td><span class="badge bg-light text-dark border">{{ r.type.replace('_', ' ').upper() }}</span></td>
+            <td><span class="fw-semibold">{{ r.title }}</span></td>
+            <td class="text-muted small">{{ r.created_at.strftime('%b %d, %Y') }}</td>
+            <td>
+              {% if r.status == 'completed' %}
+                <span class="badge bg-success">COMPLETED</span>
+              {% elif r.status == 'in_progress' %}
+                <span class="badge bg-primary">IN PROGRESS</span>
+              {% elif r.status == 'rejected' %}
+                <span class="badge bg-danger">REJECTED</span>
+              {% else %}
+                <span class="badge bg-warning text-dark">{{ r.status.upper() }}</span>
+              {% endif %}
+            </td>
+            <td>
+              <a href="{{ url_for('employee.request_detail', id=r.id) }}" class="btn btn-sm btn-light border">
+                <i class="bi bi-eye"></i> Track
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center py-4 text-muted">
+      <i class="bi bi-inbox fs-2"></i>
+      <p class="mb-0 mt-2">No requests yet. Use a quick action above or describe your request to start!</p>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

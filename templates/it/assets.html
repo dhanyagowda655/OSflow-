@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}IT Hardware Inventory — FlowOS{% endblock %}
+{% block header_title %}Hardware Fleet & Asset Inventory{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm p-4 mb-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h5 class="fw-bold mb-0">Hardware Inventory & Assignments</h5>
+    <button class="btn btn-primary btn-gradient btn-sm" data-bs-toggle="modal" data-bs-target="#addAssetModal">
+      <i class="bi bi-plus-lg"></i> Add New Asset
+    </button>
+  </div>
+
+  {% if assets %}
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>Asset Type</th>
+          <th>Model</th>
+          <th>Serial Number</th>
+          <th>Status</th>
+          <th>Assigned Employee</th>
+          <th>Allocated Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for a in assets %}
+        <tr>
+          <td><i class="bi bi-laptop me-1 text-primary"></i> {{ a.type }}</td>
+          <td><span class="fw-semibold">{{ a.model_name or 'Standard Workstation' }}</span></td>
+          <td><code>{{ a.serial_number }}</code></td>
+          <td>
+            <span class="badge bg-{{ 'success' if a.status == 'assigned' else ('primary' if a.status == 'in_stock' else 'secondary') }}">
+              {{ a.status.replace('_', ' ').upper() }}
+            </span>
+          </td>
+          <td>
+            {{ a.assigned_employee.user.name if a.assigned_employee and a.assigned_employee.user else '— In Stock —' }}
+          </td>
+          <td class="text-muted small">{{ a.allocated_at.strftime('%Y-%m-%d') if a.allocated_at else '—' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="text-center py-5 text-muted">
+    <i class="bi bi-hdd fs-1"></i>
+    <p class="mt-2 mb-0">No hardware assets registered.</p>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Add Asset Modal -->
+<div class="modal fade" id="addAssetModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="POST" action="{{ url_for('it.assets_list') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold">Add Hardware Asset to Stock</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Device Type</label>
+            <select name="type" class="form-select">
+              <option value="Laptop">Laptop / Workstation</option>
+              <option value="Monitor">4K External Monitor</option>
+              <option value="Headset">Noise-Canceling Headset</option>
+              <option value="Phone">Corporate Mobile Device</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Model Name</label>
+            <input type="text" name="model_name" class="form-control" placeholder="MacBook Pro 14 M3 / Dell XPS 15" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Serial Number (Optional - Auto-generated if blank)</label>
+            <input type="text" name="serial_number" class="form-control" placeholder="SN-89234A">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Asset</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

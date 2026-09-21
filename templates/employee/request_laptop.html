@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Request Laptop & Hardware — FlowOS{% endblock %}
+{% block header_title %}Hardware Provisioning Request{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-md-8 col-lg-6">
+    <div class="card shadow-sm p-4 p-md-5">
+      <div class="d-flex align-items-center gap-3 mb-4">
+        <div class="p-3 bg-primary-subtle text-primary rounded-circle">
+          <i class="bi bi-laptop-fill fs-3"></i>
+        </div>
+        <div>
+          <h4 class="fw-bold mb-0">Request Laptop / Workstation</h4>
+          <span class="text-muted small">Multi-Department Chain: Employee &rarr; Manager &rarr; Finance &rarr; Procurement &rarr; IT &rarr; Delivery</span>
+        </div>
+      </div>
+
+      <form method="POST" action="{{ url_for('employee.request_laptop') }}">
+        {{ form.hidden_tag() }}
+
+        <div class="mb-3">
+          <label class="form-label small fw-semibold">Select Device Model</label>
+          {{ form.model_preference(class="form-select") }}
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label small fw-semibold">Urgency Level</label>
+          {{ form.priority(class="form-select") }}
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label small fw-semibold">Business Justification</label>
+          {{ form.business_justification(class="form-control", rows="3", placeholder="Development workload, replacement for damaged machine, newly assigned project...") }}
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center">
+          <a href="{{ url_for('employee.dashboard') }}" class="btn btn-light">Cancel</a>
+          {{ form.submit(class="btn btn-primary btn-gradient px-4") }}
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

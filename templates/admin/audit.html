@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}AI Audit Logs — FlowOS{% endblock %}
+{% block header_title %}AI & Multi-Agent Audit Trail{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm p-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h5 class="fw-bold mb-0">Auditable Agent Action Logs</h5>
+    <span class="text-muted small">Real-time audit log of all agent calls, fallback triggers, and latencies</span>
+  </div>
+
+  {% if logs %}
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>Timestamp</th>
+          <th>Agent / Source</th>
+          <th>Action</th>
+          <th>Model / Tier</th>
+          <th>Prompt / Input</th>
+          <th>Response / Result</th>
+          <th>Latency</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in logs %}
+        <tr>
+          <td class="text-muted small">{{ log.created_at.strftime('%H:%M:%S') }}</td>
+          <td><span class="badge bg-secondary badge-role">{{ log.agent_type.upper() }}</span></td>
+          <td><span class="fw-semibold">{{ log.action }}</span></td>
+          <td>
+            <span class="badge bg-{{ 'success' if log.model_used == 'gemini' else ('info' if log.model_used == 'mistral' else 'warning text-dark') }}">
+              {{ log.model_used or 'rule_engine' }}
+            </span>
+          </td>
+          <td>
+            <div class="text-truncate small text-muted" style="max-width: 200px;" title="{{ log.prompt }}">{{ log.prompt }}</div>
+          </td>
+          <td>
+            <div class="text-truncate small text-dark" style="max-width: 250px;" title="{{ log.response }}">{{ log.response }}</div>
+          </td>
+          <td class="text-muted small">{{ log.latency_ms }} ms</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="text-center py-5 text-muted">
+    <i class="bi bi-journal-check fs-1"></i>
+    <p class="mt-2 mb-0">No AI audit events logged yet.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

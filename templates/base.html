@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}FlowOS — Enterprise Workflow Operating System{% endblock %}</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <!-- Google Fonts Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Custom FlowOS CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+</head>
+<body>
+  {% if current_user.is_authenticated %}
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar d-flex flex-column justify-content-between p-3">
+    <div>
+      <div class="d-flex align-items-center gap-2 mb-4 px-2">
+        <i class="bi bi-cpu-fill fs-3 text-primary"></i>
+        <span class="brand-title">FlowOS</span>
+      </div>
+
+      <nav class="nav flex-column">
+        <!-- Common / Employee Links -->
+        <a class="nav-link {% if request.endpoint == 'employee.dashboard' %}active{% endif %}" href="{{ url_for('employee.dashboard') }}">
+          <i class="bi bi-grid-1x2-fill"></i> Employee Portal
+        </a>
+        <a class="nav-link {% if request.endpoint == 'employee.requests_list' %}active{% endif %}" href="{{ url_for('employee.requests_list') }}">
+          <i class="bi bi-collection-play-fill"></i> My Requests
+        </a>
+
+        <!-- Manager Section -->
+        {% if current_user.role in ['manager', 'admin'] %}
+        <hr class="border-secondary my-2">
+        <div class="text-uppercase text-muted px-3 small fw-bold" style="font-size: 0.7rem;">Management</div>
+        <a class="nav-link {% if request.endpoint == 'manager.dashboard' %}active{% endif %}" href="{{ url_for('manager.dashboard') }}">
+          <i class="bi bi-check2-circle"></i> Manager Portal
+        </a>
+        <a class="nav-link {% if request.endpoint == 'manager.approvals_list' %}active{% endif %}" href="{{ url_for('manager.approvals_list') }}">
+          <i class="bi bi-clock-history"></i> Approvals Queue
+        </a>
+        {% endif %}
+
+        <!-- HR Section -->
+        {% if current_user.role in ['hr', 'admin'] %}
+        <hr class="border-secondary my-2">
+        <div class="text-uppercase text-muted px-3 small fw-bold" style="font-size: 0.7rem;">Human Resources</div>
+        <a class="nav-link {% if request.endpoint == 'hr.dashboard' %}active{% endif %}" href="{{ url_for('hr.dashboard') }}">
+          <i class="bi bi-people-fill"></i> HR Portal
+        </a>
+        <a class="nav-link {% if request.endpoint == 'hr.onboard_employee' %}active{% endif %}" href="{{ url_for('hr.onboard_employee') }}">
+          <i class="bi bi-person-plus-fill"></i> Onboard Staff
+        </a>
+        <a class="nav-link {% if request.endpoint == 'workflow.builder' %}active{% endif %}" href="{{ url_for('workflow.builder') }}">
+          <i class="bi bi-diagram-3-fill"></i> Workflow Builder
+        </a>
+        {% endif %}
+
+        <!-- IT Portal -->
+        {% if current_user.role in ['it', 'admin'] %}
+        <hr class="border-secondary my-2">
+        <div class="text-uppercase text-muted px-3 small fw-bold" style="font-size: 0.7rem;">IT Infrastructure</div>
+        <a class="nav-link {% if request.endpoint == 'it.dashboard' %}active{% endif %}" href="{{ url_for('it.dashboard') }}">
+          <i class="bi bi-laptop-fill"></i> IT Operations
+        </a>
+        <a class="nav-link {% if request.endpoint == 'it.tickets_list' %}active{% endif %}" href="{{ url_for('it.tickets_list') }}">
+          <i class="bi bi-ticket-detailed-fill"></i> Ticket Queue
+        </a>
+        <a class="nav-link {% if request.endpoint == 'it.assets_list' %}active{% endif %}" href="{{ url_for('it.assets_list') }}">
+          <i class="bi bi-hdd-network-fill"></i> Hardware Assets
+        </a>
+        {% endif %}
+
+        <!-- Finance Portal -->
+        {% if current_user.role in ['finance', 'admin'] %}
+        <hr class="border-secondary my-2">
+        <div class="text-uppercase text-muted px-3 small fw-bold" style="font-size: 0.7rem;">Finance</div>
+        <a class="nav-link {% if request.endpoint == 'finance.dashboard' %}active{% endif %}" href="{{ url_for('finance.dashboard') }}">
+          <i class="bi bi-cash-coin"></i> Finance Portal
+        </a>
+        <a class="nav-link {% if request.endpoint == 'finance.claims_list' %}active{% endif %}" href="{{ url_for('finance.claims_list') }}">
+          <i class="bi bi-receipt"></i> Expense Claims
+        </a>
+        {% endif %}
+
+        <!-- Procurement Portal -->
+        {% if current_user.role in ['procurement', 'admin'] %}
+        <hr class="border-secondary my-2">
+        <div class="text-uppercase text-muted px-3 small fw-bold" style="font-size: 0.7rem;">Procurement</div>
+        <a class="nav-link {% if request.endpoint == 'procurement.dashboard' %}active{% endif %}" href="{{ url_for('procurement.dashboard') }}">
+          <i class="bi bi-box-seam-fill"></i> Procurement Desk
+        </a>
+        {% endif %}
+
+        <!-- Admin & Analytics -->
+        {% if current_user.role in ['admin', 'hr', 'manager'] %}
+        <hr class="border-secondary my-2">
+        <div class="text-uppercase text-muted px-3 small fw-bold" style="font-size: 0.7rem;">Intelligence</div>
+        <a class="nav-link {% if request.endpoint == 'admin.analytics' %}active{% endif %}" href="{{ url_for('admin.analytics') }}">
+          <i class="bi bi-graph-up-arrow"></i> ML Analytics
+        </a>
+        {% endif %}
+
+        {% if current_user.role == 'admin' %}
+        <a class="nav-link {% if request.endpoint == 'admin.dashboard' %}active{% endif %}" href="{{ url_for('admin.dashboard') }}">
+          <i class="bi bi-shield-lock-fill"></i> System Admin
+        </a>
+        <a class="nav-link {% if request.endpoint == 'admin.audit_logs' %}active{% endif %}" href="{{ url_for('admin.audit_logs') }}">
+          <i class="bi bi-journal-text"></i> AI Audit Logs
+        </a>
+        {% endif %}
+      </nav>
+    </div>
+
+    <!-- User Profile in Sidebar Footer -->
+    <div class="border-top border-secondary pt-3 px-2">
+      <div class="d-flex align-items-center justify-content-between">
+        <div>
+          <div class="fw-semibold text-white small">{{ current_user.name }}</div>
+          <span class="badge bg-primary badge-role">{{ current_user.role }}</span>
+        </div>
+        <a href="{{ url_for('auth.logout') }}" class="btn btn-sm btn-outline-danger" title="Sign Out">
+          <i class="bi bi-box-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Wrapper -->
+  <div class="main-wrapper">
+    <!-- Topbar -->
+    <header class="top-navbar">
+      <div class="d-flex align-items-center gap-3">
+        <h5 class="mb-0 fw-bold text-dark">{% block header_title %}FlowOS Portal{% endblock %}</h5>
+      </div>
+
+      <div class="d-flex align-items-center gap-3">
+        <!-- Notification Dropdown -->
+        <div class="dropdown">
+          <button class="btn btn-light position-relative rounded-circle p-2" id="notifDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-bell-fill fs-5 text-secondary"></i>
+            <span id="notifBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none">
+              0
+            </span>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end shadow-sm" id="notifDropdownList" style="width: 320px; max-height: 380px; overflow-y: auto;">
+            <li class="p-3 text-center text-muted small">Loading alerts...</li>
+          </ul>
+        </div>
+
+        <!-- User Role Indicator -->
+        <div class="d-flex align-items-center gap-2 border-start ps-3">
+          <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 38px; height: 38px;">
+            {{ current_user.name[:1] }}
+          </div>
+          <div class="d-none d-md-block">
+            <div class="small fw-semibold leading-tight">{{ current_user.name }}</div>
+            <div class="text-muted" style="font-size: 0.75rem;">{{ current_user.email }}</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Page Content Container -->
+    <main class="content-container">
+      <!-- Flash Messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm" role="alert">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+
+  {% else %}
+  <!-- Unauthenticated Layout (e.g. Login / Register) -->
+  <main>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="container mt-4">
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% block unauth_content %}{% endblock %}
+  </main>
+  {% endif %}
+
+  <!-- Bootstrap 5 JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- FlowOS Main JS -->
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Employee Directory — FlowOS{% endblock %}
+{% block header_title %}Staff & Talent Directory{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm p-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <h5 class="fw-bold mb-0">Registered Employees</h5>
+    <a href="{{ url_for('hr.onboard_employee') }}" class="btn btn-primary btn-gradient">
+      <i class="bi bi-person-plus-fill"></i> Onboard New Employee
+    </a>
+  </div>
+
+  {% if employees %}
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>Staff Member</th>
+          <th>Role / System Level</th>
+          <th>Department</th>
+          <th>Designation</th>
+          <th>Reporting Manager</th>
+          <th>Join Date</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for emp in employees %}
+        <tr>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <div class="avatar bg-light text-primary border rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 34px; height: 34px;">
+                {{ emp.user.name[:1] if emp.user else 'E' }}
+              </div>
+              <div>
+                <div class="fw-semibold">{{ emp.user.name if emp.user else 'Unknown' }}</div>
+                <div class="text-muted small">{{ emp.user.email if emp.user else '' }}</div>
+              </div>
+            </div>
+          </td>
+          <td><span class="badge bg-secondary badge-role">{{ emp.user.role if emp.user else 'employee' }}</span></td>
+          <td>{{ emp.user.department.name if emp.user and emp.user.department else 'General' }}</td>
+          <td>{{ emp.designation }}</td>
+          <td>{{ emp.manager.user.name if emp.manager and emp.manager.user else '—' }}</td>
+          <td class="text-muted small">{{ emp.join_date or '—' }}</td>
+          <td>
+            <span class="badge bg-{{ 'success' if emp.user and emp.user.is_active else 'danger' }}">
+              {{ 'ACTIVE' if emp.user and emp.user.is_active else 'INACTIVE' }}
+            </span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="text-center py-5 text-muted">
+    <i class="bi bi-people fs-1"></i>
+    <p class="mt-2 mb-0">No employees registered yet.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

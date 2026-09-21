@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Procurement Dashboard — FlowOS{% endblock %}
+{% block header_title %}Procurement & Supply Chain Operations{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+
+  <!-- Procurement Banner -->
+  <div class="card p-4 mb-4 text-white border-0 shadow-sm" style="background: linear-gradient(135deg, #78350f 0%, #0f172a 100%);">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <h4 class="fw-bold mb-1">Hardware Procurement & Logistics</h4>
+        <p class="text-light opacity-75 small mb-0">Automated PO Creation, Vendor Fulfillment & Courier Dispatch Tracking</p>
+      </div>
+      <div class="col-md-4 text-md-end mt-3 mt-md-0">
+        <a href="{{ url_for('procurement.orders_list') }}" class="btn btn-warning fw-bold">
+          <i class="bi bi-box-seam"></i> View Orders Queue
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Key Metrics -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="card p-3 stat-card">
+        <div class="text-muted small fw-semibold">Pending Vendor POs</div>
+        <h3 class="fw-bold text-warning mt-1 mb-0">{{ pending_orders|length }}</h3>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card p-3" style="border-left: 4px solid var(--success);">
+        <div class="text-muted small fw-semibold">Fulfilled & Dispatched</div>
+        <h3 class="fw-bold text-success mt-1 mb-0">{{ fulfilled_orders|length }}</h3>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card p-3" style="border-left: 4px solid var(--primary);">
+        <div class="text-muted small fw-semibold">Total Lifecycle Orders</div>
+        <h3 class="fw-bold text-primary mt-1 mb-0">{{ hardware_reqs|length }}</h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- Open Orders Table -->
+  <div class="card shadow-sm p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="fw-bold mb-0"><i class="bi bi-truck text-warning"></i> Hardware Procurement Orders</h5>
+      <a href="{{ url_for('procurement.orders_list') }}" class="btn btn-sm btn-outline-primary">All POs</a>
+    </div>
+
+    {% if pending_orders %}
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>Order ID</th>
+            <th>Requester</th>
+            <th>Equipment Summary</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for o in pending_orders %}
+          <tr>
+            <td><span class="fw-bold">#{{ o.id }}</span></td>
+            <td>{{ o.employee.user.name if o.employee and o.employee.user else 'Staff' }}</td>
+            <td><span class="fw-semibold">{{ o.title }}</span></td>
+            <td class="text-muted small">{{ o.created_at.strftime('%b %d, %Y') }}</td>
+            <td>
+              <span class="badge bg-warning text-dark">{{ o.status.upper() }}</span>
+            </td>
+            <td>
+              <form method="POST" action="{{ url_for('procurement.fulfill_order', id=o.id) }}" class="d-inline">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-sm btn-success fw-semibold">
+                  <i class="bi bi-box-arrow-up-right"></i> Fulfill & Dispatch
+                </button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="text-muted small mb-0">No hardware procurement orders waiting fulfillment.</p>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

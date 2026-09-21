@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}IT Support Queue — FlowOS{% endblock %}
+{% block header_title %}IT Support Desk & Triage{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm p-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h5 class="fw-bold mb-0">Support Tickets</h5>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('it.tickets_list') }}" class="btn btn-sm btn-outline-secondary">All Tickets</a>
+      <a href="{{ url_for('it.tickets_list', status='in_progress') }}" class="btn btn-sm btn-outline-warning">In Progress</a>
+      <a href="{{ url_for('it.tickets_list', status='completed') }}" class="btn btn-sm btn-outline-success">Resolved</a>
+    </div>
+  </div>
+
+  {% if tickets %}
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>ID</th>
+          <th>Requester</th>
+          <th>Summary & Description</th>
+          <th>Priority</th>
+          <th>Submitted</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in tickets %}
+        <tr>
+          <td><span class="fw-bold">#{{ t.id }}</span></td>
+          <td>{{ t.employee.user.name if t.employee and t.employee.user else 'Staff' }}</td>
+          <td>
+            <div class="fw-semibold">{{ t.title }}</div>
+            <div class="text-muted small">{{ t.description }}</div>
+          </td>
+          <td>
+            <span class="badge bg-{{ 'danger' if t.priority in ['high', 'urgent'] else 'secondary' }}">
+              {{ t.priority.upper() }}
+            </span>
+          </td>
+          <td class="text-muted small">{{ t.created_at.strftime('%b %d, %H:%M') }}</td>
+          <td>
+            <span class="badge bg-{{ 'success' if t.status == 'completed' else 'warning text-dark' }}">
+              {{ t.status.upper() }}
+            </span>
+          </td>
+          <td>
+            {% if t.status != 'completed' %}
+            <form method="POST" action="{{ url_for('it.resolve_ticket', id=t.id) }}" class="d-inline">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="btn btn-sm btn-success fw-semibold">
+                <i class="bi bi-check-lg"></i> Mark Resolved
+              </button>
+            </form>
+            {% else %}
+            <span class="text-muted small"><i class="bi bi-check-circle text-success"></i> Done</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="text-center py-5 text-muted">
+    <i class="bi bi-ticket-perforated fs-1"></i>
+    <p class="mt-2 mb-0">No IT tickets in this view.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Workflow Templates — FlowOS{% endblock %}
+{% block header_title %}Workflow Template Library & Vector Embeddings{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm p-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h5 class="fw-bold mb-0">Seeded Workflow DAG Templates</h5>
+      <span class="text-muted small">Matched automatically via semantic cosine similarity when employees submit requests</span>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    {% for tmpl in templates %}
+    <div class="col-md-6">
+      <div class="card p-4 h-100 border">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <h6 class="fw-bold text-dark mb-0">{{ tmpl.name }}</h6>
+          <span class="badge bg-primary-subtle text-primary">{{ tmpl.category.upper() }}</span>
+        </div>
+        <p class="text-muted small mb-3">{{ tmpl.description }}</p>
+        
+        {% set dag = tmpl.get_dag() %}
+        <div class="bg-light p-3 rounded small">
+          <div class="fw-semibold mb-2">Tasks in DAG ({{ dag.tasks|length if dag.tasks else 0 }} steps):</div>
+          <ol class="mb-0 ps-3">
+            {% for t in dag.tasks %}
+            <li><strong>{{ t.name }}</strong> <span class="badge bg-secondary badge-role" style="font-size: 0.6rem;">{{ t.agent_type }}</span></li>
+            {% endfor %}
+          </ol>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

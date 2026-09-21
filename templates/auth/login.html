@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Sign In — FlowOS{% endblock %}
+{% block unauth_content %}
+<div class="container py-5">
+  <div class="row justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="col-12 col-md-8 col-lg-5">
+      
+      <!-- Brand Logo -->
+      <div class="text-center mb-4">
+        <div class="d-inline-flex align-items-center justify-content-center bg-primary text-white rounded-circle mb-2" style="width: 54px; height: 54px;">
+          <i class="bi bi-cpu-fill fs-2"></i>
+        </div>
+        <h2 class="fw-bold text-dark mb-1">FlowOS</h2>
+        <p class="text-muted small">AI-Powered Workflow Operating System for Enterprises</p>
+      </div>
+
+      <!-- Login Card -->
+      <div class="card shadow-sm p-4 p-md-5 mb-4">
+        <h5 class="fw-bold mb-4">Sign in to your account</h5>
+        <form method="POST" action="{{ url_for('auth.login') }}">
+          {{ form.hidden_tag() }}
+          
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Email Address</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light"><i class="bi bi-envelope"></i></span>
+              {{ form.email(class="form-control", id="loginEmail", placeholder="name@flowos.demo") }}
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label small fw-semibold">Password</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light"><i class="bi bi-lock"></i></span>
+              {{ form.password(class="form-control", id="loginPassword", placeholder="••••••••") }}
+            </div>
+          </div>
+
+          <div class="d-grid mb-3">
+            {{ form.submit(class="btn btn-primary btn-gradient py-2 fw-semibold") }}
+          </div>
+
+          <div class="text-center">
+            <span class="text-muted small">Need an account? </span>
+            <a href="{{ url_for('auth.register') }}" class="small fw-semibold text-decoration-none">Register here</a>
+          </div>
+        </form>
+      </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Claim Expense Reimbursement — FlowOS{% endblock %}
+{% block header_title %}Expense Reimbursement{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-md-8 col-lg-6">
+    <div class="card shadow-sm p-4 p-md-5">
+      <div class="d-flex align-items-center gap-3 mb-4">
+        <div class="p-3 bg-success-subtle text-success rounded-circle">
+          <i class="bi bi-receipt fs-3"></i>
+        </div>
+        <div>
+          <h4 class="fw-bold mb-0">Submit Expense Claim</h4>
+          <span class="text-muted small">OCR Receipt Scanning &bull; Duplicate Detection &bull; Policy Compliance &bull; Automated Disbursement</span>
+        </div>
+      </div>
+
+      <form method="POST" action="{{ url_for('employee.request_expense') }}" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label small fw-semibold">Expense Category</label>
+            {{ form.category(class="form-select") }}
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label class="form-label small fw-semibold">Amount ($ USD)</label>
+            {{ form.amount(class="form-control", placeholder="149.99") }}
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label small fw-semibold">Vendor / Merchant</label>
+          {{ form.vendor(class="form-control", placeholder="Delta Airlines, Uber, Apple Store, AWS...") }}
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label small fw-semibold">Upload Receipt (Image / PDF / TXT)</label>
+          {{ form.receipt(class="form-control") }}
+          <div class="form-text small">FlowOS OCR will automatically verify vendor name, date, and grand total.</div>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label small fw-semibold">Business Purpose</label>
+          {{ form.description(class="form-control", rows="2", placeholder="Client meeting travel expenses...") }}
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center">
+          <a href="{{ url_for('employee.dashboard') }}" class="btn btn-light">Cancel</a>
+          {{ form.submit(class="btn btn-primary btn-gradient px-4") }}
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

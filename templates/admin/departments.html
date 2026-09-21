@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Departments — FlowOS{% endblock %}
+{% block header_title %}Enterprise Department Structure{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-7">
+    <div class="card shadow-sm p-4">
+      <h5 class="fw-bold mb-3">Active Departments</h5>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>ID</th>
+              <th>Department Name</th>
+              <th>Staff Count</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for d in departments %}
+            <tr>
+              <td>#{{ d.id }}</td>
+              <td><strong>{{ d.name }}</strong></td>
+              <td><span class="badge bg-light text-dark border">{{ d.users|length }} Members</span></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-5">
+    <div class="card shadow-sm p-4">
+      <h5 class="fw-bold mb-3">Add Department</h5>
+      <form method="POST" action="{{ url_for('admin.departments_list') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="mb-3">
+          <label class="form-label small fw-semibold">Department Title</label>
+          <input type="text" name="name" class="form-control" placeholder="e.g. Legal & Compliance" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-gradient">Create Department</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
