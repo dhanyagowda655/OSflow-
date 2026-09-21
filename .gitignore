@@ -101,3 +101,5 @@ ehthumbs.db
 Thumbs.db
 [Dd]esktop.ini
 
+# Seed and temporary scripts
+seed.py
