@@ -1,5 +1,6 @@
 import os
 import logging
+from datetime import datetime, timezone
 from logging.handlers import RotatingFileHandler
 from flask import Flask, redirect, url_for, render_template
 from flask_login import current_user
@@ -70,15 +71,72 @@ def create_app(config_class=Config):
     with app.app_context():
         db.create_all()
         try:
-            from models import User
+            from models import User, Department
             if User.query.count() == 0:
-                from seed import seed_database
-                seed_database(app)
+                try:
+                    from seed import seed_database
+                    seed_database(app)
+                except ImportError:
+                    # Built-in fallback seeder if seed.py is excluded
+                    _bootstrap_demo_data(app)
         except Exception as e:
             app.logger.warning(f"Auto-seed check note: {e}")
 
     return app
 
+def _bootstrap_demo_data(app):
+    """Fallback seeder to ensure all 7 roles work on cloud deployment."""
+    from models import Department, User, Employee, LeaveBalance
+    with app.app_context():
+        depts = ['Engineering', 'Human Resources', 'Finance & Operations', 'IT Infrastructure']
+        dept_map = {}
+        for d in depts:
+            dept = Department.query.filter_by(name=d).first()
+            if not dept:
+                dept = Department(name=d)
+                db.session.add(dept)
+                db.session.flush()
+            dept_map[d] = dept
+
+        demo_users = [
+            {'email': 'employee@flowos.demo', 'name': 'Alex Rivera', 'role': 'employee', 'dept': 'Engineering', 'desig': 'Software Engineer'},
+            {'email': 'manager@flowos.demo', 'name': 'Sarah Connor', 'role': 'manager', 'dept': 'Engineering', 'desig': 'Engineering Director'},
+            {'email': 'hr@flowos.demo', 'name': 'Emma Watson', 'role': 'hr', 'dept': 'Human Resources', 'desig': 'HR Specialist'},
+            {'email': 'it@flowos.demo', 'name': 'David Miller', 'role': 'it', 'dept': 'IT Infrastructure', 'desig': 'Lead Systems Engineer'},
+            {'email': 'finance@flowos.demo', 'name': 'Michael Chang', 'role': 'finance', 'dept': 'Finance & Operations', 'desig': 'Chief Financial Controller'},
+            {'email': 'procurement@flowos.demo', 'name': 'Rachel Green', 'role': 'procurement', 'dept': 'Finance & Operations', 'desig': 'Procurement Officer'},
+            {'email': 'admin@flowos.demo', 'name': 'Admin Superuser', 'role': 'admin', 'dept': 'IT Infrastructure', 'desig': 'Enterprise Systems Admin'},
+        ]
+
+        for acc in demo_users:
+            u = User.query.filter_by(email=acc['email']).first()
+            if not u:
+                u = User(
+                    email=acc['email'],
+                    name=acc['name'],
+                    role=acc['role'],
+                    department_id=dept_map[acc['dept']].id,
+                    is_active=True
+                )
+                u.set_password('Demo@123')
+                db.session.add(u)
+                db.session.flush()
+
+                emp = Employee(
+                    user_id=u.id,
+                    designation=acc['desig'],
+                    joining_date=datetime.now(timezone.utc).date() if 'datetime' in globals() else None
+                )
+                db.session.add(emp)
+                db.session.flush()
+                db.session.add(LeaveBalance(employee_id=emp.id, annual_leave=20, sick_leave=10, casual_leave=7))
+
+        db.session.commit()
+
+# Expose app for WSGI servers like Gunicorn
+app = create_app()
+
 if __name__ == '__main__':
-    app = create_app()
-    app.run(host='127.0.0.1', port=5000, debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)
+
