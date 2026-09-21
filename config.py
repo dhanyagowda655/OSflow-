@@ -7,7 +7,11 @@ load_dotenv(BASE_DIR / '.env')
 
 class Config:
     SECRET_KEY = os.getenv('FLASK_SECRET_KEY', 'flowos-default-secret-key-384918237')
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', f"sqlite:///{BASE_DIR / 'flowos.db'}")
+    _raw_db_url = os.getenv('DATABASE_URL', f"sqlite:///{BASE_DIR / 'flowos.db'}")
+    # Render PostgreSQL URLs start with postgres://, which SQLAlchemy 2.0 requires as postgresql://
+    if _raw_db_url.startswith('postgres://'):
+        _raw_db_url = _raw_db_url.replace('postgres://', 'postgresql://', 1)
+    SQLALCHEMY_DATABASE_URI = _raw_db_url
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # Upload settings
