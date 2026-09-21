@@ -1,26 +1,22 @@
 import pytest
-from app import create_app
+from app import create_app, _bootstrap_demo_data
+from config import TestConfig
 from extensions import db
 from models import Workflow, WorkflowStep
 from agents.orchestrator import WorkflowOrchestrator, WorkflowValidationError, orchestrator
 from ai.ai_client import generate_workflow_json, classify_ticket
 from ai.workflow_generator import workflow_generator_service
-from seed import seed_database
 
 @pytest.fixture
 def app():
-    app = create_app()
-    app.config.update({
-        'TESTING': True,
-        'SQLALCHEMY_DATABASE_URI': 'sqlite:///:memory:',
-        'WTF_CSRF_ENABLED': False
-    })
+    app = create_app(TestConfig)
     with app.app_context():
         db.create_all()
-        seed_database(app)
+        _bootstrap_demo_data(app)
         yield app
         db.session.remove()
         db.drop_all()
+
 
 def test_dag_topological_sort_and_parallel_batches():
     # Independent tasks t1 & t2 running in parallel, followed by t3

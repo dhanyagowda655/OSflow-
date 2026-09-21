@@ -1,4 +1,5 @@
 import os
+import sys
 import logging
 from datetime import datetime, timezone
 from logging.handlers import RotatingFileHandler
@@ -69,8 +70,8 @@ def create_app(config_class=Config):
 
     # Auto-seed database if empty
     with app.app_context():
-        db.create_all()
         try:
+            db.create_all()
             from models import User, Department
             if User.query.count() == 0:
                 try:
@@ -80,7 +81,7 @@ def create_app(config_class=Config):
                     # Built-in fallback seeder if seed.py is excluded
                     _bootstrap_demo_data(app)
         except Exception as e:
-            app.logger.warning(f"Auto-seed check note: {e}")
+            app.logger.warning(f"Database initialization note: {e}")
 
     return app
 
@@ -286,11 +287,19 @@ def _bootstrap_demo_data(app):
 
         db.session.commit()
 
-# Expose app for WSGI servers like Gunicorn
-app = create_app()
+# Expose app for WSGI servers like Gunicorn (lazy/safe under test suites)
+if 'PYTEST_CURRENT_TEST' not in os.environ and 'pytest' not in sys.modules:
+    try:
+        app = create_app()
+    except Exception as _startup_err:
+        logging.getLogger('app').warning(f"WSGI module init note: {_startup_err}")
+        app = None
 
 if __name__ == '__main__':
+    if not app:
+        app = create_app()
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=False)
+
 
 
